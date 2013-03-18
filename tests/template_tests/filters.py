@@ -247,7 +247,7 @@ def get_filter_tests():
 
         'filter-wordwrap01': ('{% autoescape off %}{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}{% endautoescape %}', {"a": "a & b", "b": mark_safe("a & b")}, "a &\nb a &\nb"),
         'filter-wordwrap02': ('{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}', {"a": "a & b", "b": mark_safe("a & b")}, "a &amp;\nb a &\nb"),
-        'filter-wordwrap03': ('{{ a|wordwrap:b }}', {"a": mark_safe("this is a long paragraph of text that really needs to be wrapped I\'m afraid"), "b": 14}, "this is a long\nparagraph of\ntext that\nreally needs\nto be wrapped\nI'm afraid"),
+        'filter-wordwrap03': ('{{ a|wordwrap:b }}', {"a": "this is a long paragraph of text that really needs to be wrapped I\'m afraid", "b": 14}, "this is a long\nparagraph of\ntext that\nreally needs\nto be wrapped\nI&#39;m afraid"),
         'filter-wordwrap04': ('{{ a|wordwrap:b }}', {"a": "this is a short paragraph of text.\n  But this line should be indented", "b": 14}, "this is a\nshort\nparagraph of\ntext.\n  But this\nline should be\nindented"),
         'filter-wordwrap05': ('{{ a|wordwrap:b }}', {"a": "this is a short paragraph of text.\n  But this line should be indented", "b": 15}, "this is a short\nparagraph of\ntext.\n  But this line\nshould be\nindented"),
 
