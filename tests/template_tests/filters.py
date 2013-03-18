@@ -172,8 +172,10 @@ def get_filter_tests():
         'filter-stringformat04': ('{{ a|stringformat:"z" }}', {'a': 1}, ''),
 
         # Test the title filter
+        # Single quote doesn't imply starting a new word
         'filter-title01' : ('{{ a|title }}', {'a' : 'JOE\'S CRAB SHACK'}, 'Joe&#39;s Crab Shack'),
         'filter-title02' : ('{{ a|title }}', {'a' : '555 WEST 53RD STREET'}, '555 West 53rd Street'),
+        # Single quote doesn't imply starting a new word, with autoescape off
         'filter-title03' : ('{% autoescape off %}{{ a|title }}{% endautoescape %}', {'a' : 'a nice title, isn\'t it?'}, 'A Nice Title, Isn\'t It?'),
         'filter-title04' : ('{{ a|title }}', {'a' : 'discoth\xe8que'}, 'Discoth\xe8que'),
 
