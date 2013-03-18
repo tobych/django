@@ -89,27 +89,62 @@ def get_filter_tests():
         'filter-timeuntil12' : ('{{ a|timeuntil:b }}', {'a': today, 'b': today}, '0 minutes'),
         'filter-timeuntil13' : ('{{ a|timeuntil:b }}', {'a': today, 'b': today - timedelta(hours=24)}, '1 day'),
 
-        'filter-addslash01': ("{% autoescape off %}{{ a|addslashes }} {{ b|addslashes }}{% endautoescape %}", {"a": "<a>'", "b": mark_safe("<a>'")}, r"<a>\' <a>\'"),
-        'filter-addslash02': ("{{ a|addslashes }} {{ b|addslashes }}", {"a": "<a>'", "b": mark_safe("<a>'")}, r"&lt;a&gt;\&#39; <a>\'"),
+        'filter-addslash01': ("{% autoescape off %}{{ a|addslashes }} {{ b|addslashes }}{% endautoescape %}", {"a": "<a>'", "b": mark_safe("<a>'")}, ur"<a>\' <a>\'"),
+        'filter-addslash02': ("{{ a|addslashes }} {{ b|addslashes }}", {"a": "<a>'", "b": mark_safe("<a>'")}, ur"&lt;a&gt;\&#39; <a>\'"),
+        'filter-addslash03': ("{{ a|addslashes }}", {"a": mark_safe("\"double quotes\" and 'single quotes'")}, "\\\"double quotes\\\" and \\'single quotes\\'"),
+        'filter-addslash04': ("{{ a|addslashes }}", {"a": mark_safe(ur"\ : backslashes, too")}, "\\\\ : backslashes, too"),
 
         'filter-capfirst01': ("{% autoescape off %}{{ a|capfirst }} {{ b|capfirst }}{% endautoescape %}", {"a": "fred>", "b": mark_safe("fred&gt;")}, "Fred> Fred&gt;"),
         'filter-capfirst02': ("{{ a|capfirst }} {{ b|capfirst }}", {"a": "fred>", "b": mark_safe("fred&gt;")}, "Fred&gt; Fred&gt;"),
+        'filter-capfirst03': ("{{ a|capfirst }}", {"a": "hello world"}, "Hello world"),
 
         # Note that applying fix_ampsersands in autoescape mode leads to
         # double escaping.
         'filter-fix_ampersands01': ("{% autoescape off %}{{ a|fix_ampersands }} {{ b|fix_ampersands }}{% endautoescape %}", {"a": "a&b", "b": mark_safe("a&b")}, "a&amp;b a&amp;b"),
         'filter-fix_ampersands02': ("{{ a|fix_ampersands }} {{ b|fix_ampersands }}", {"a": "a&b", "b": mark_safe("a&b")}, "a&amp;amp;b a&amp;b"),
+        'filter-fix_ampersands03': ("{{ a|fix_ampersands }}", {"a": mark_safe("Jack & Jill & Jeroboam")}, "Jack &amp; Jill &amp; Jeroboam"),
 
         'filter-floatformat01': ("{% autoescape off %}{{ a|floatformat }} {{ b|floatformat }}{% endautoescape %}", {"a": "1.42", "b": mark_safe("1.42")}, "1.4 1.4"),
         'filter-floatformat02': ("{{ a|floatformat }} {{ b|floatformat }}", {"a": "1.42", "b": mark_safe("1.42")}, "1.4 1.4"),
+        'filter-floatformat03': ("{{ a|floatformat }}", {"a": 7.7}, "7.7"),
+        'filter-floatformat04': ("{{ a|floatformat }}", {"a": 7.0}, "7"),
+        'filter-floatformat05': ("{{ a|floatformat }}", {"a": 0.7}, "0.7"),
+        'filter-floatformat06': ("{{ a|floatformat }}", {"a": 0.07}, "0.1"),
+        'filter-floatformat07': ("{{ a|floatformat }}", {"a": 0.007}, "0.0"),
+        'filter-floatformat08': ("{{ a|floatformat }}", {"a": 0.0}, "0"),
+        'filter-floatformat09': ("{{ a|floatformat:b }}", {"a": 7.7, "b": "3"}, "7.700"),
+        'filter-floatformat10': ("{{ a|floatformat:b }}", {"a": 6.000000, "b": 3}, "6.000"),
+        'filter-floatformat11': ("{{ a|floatformat:b }}", {"a": 6.200000, "b": 3}, "6.200"),
+        'filter-floatformat12': ("{{ a|floatformat:b }}", {"a": 6.200000, "b": -3}, "6.200"),
+        'filter-floatformat13': ("{{ a|floatformat:b }}", {"a": 13.1031, "b": -3}, "13.103"),
+        'filter-floatformat14': ("{{ a|floatformat:b }}", {"a": 11.1197, "b": -2}, "11.12"),
+        'filter-floatformat15': ("{{ a|floatformat:b }}", {"a": 11.0000, "b": -2}, "11"),
+        'filter-floatformat16': ("{{ a|floatformat:b }}", {"a": 11.000001, "b": -2}, "11.00"),
+        'filter-floatformat17': ("{{ a|floatformat:b }}", {"a": 8.2798, "b": 3}, "8.280"),
+        'filter-floatformat18': ("{{ a|floatformat }}", {"a": "foo"}, ""),
+        'filter-floatformat19': ("{{ a|floatformat:b }}", {"a": 13.1031, "b": "bar"}, "13.1031"),
+        'filter-floatformat20': ("{{ a|floatformat:b }}", {"a": 18.125, "b": 2}, "18.13"),
+        'filter-floatformat21': ("{{ a|floatformat:b }}", {"a": "foo", "b": "bar"}, ""),
+        'filter-floatformat22': ("{{ a|floatformat }}", {"a": "¿Cómo esta usted?"}, ""),
+        'filter-floatformat23': ("{{ a|floatformat }}", {"a": None}, ""),
+
+        # Check that we're not converting to scientific notation.
+        'filter-floatformat24': ("{{ a|floatformat:b }}", {"a": 0, "b": 6}, "0.000000"),
+        'filter-floatformat25': ("{{ a|floatformat:b }}", {"a": 0, "b": 7}, "0.0000000"),
+        'filter-floatformat26': ("{{ a|floatformat:b }}", {"a": 0, "b": 10}, "0.0000000000"),
+        'filter-floatformat27': ("{{ a|floatformat:b }}", {"a": 0.000000000000000000015, "b": 20}, "0.00000000000000000002"),
 
         # The contents of "linenumbers" is escaped according to the current
         # autoescape setting.
         'filter-linenumbers01': ("{{ a|linenumbers }} {{ b|linenumbers }}", {"a": "one\n<two>\nthree", "b": mark_safe("one\n&lt;two&gt;\nthree")}, "1. one\n2. &lt;two&gt;\n3. three 1. one\n2. &lt;two&gt;\n3. three"),
         'filter-linenumbers02': ("{% autoescape off %}{{ a|linenumbers }} {{ b|linenumbers }}{% endautoescape %}", {"a": "one\n<two>\nthree", "b": mark_safe("one\n&lt;two&gt;\nthree")}, "1. one\n2. <two>\n3. three 1. one\n2. &lt;two&gt;\n3. three"),
+        'filter-linenumbers03': ("{{ a|linenumbers }}", {"a": "line 1\nline 2"}, "1. line 1\n2. line 2"),
+        'filter-linenumbers04': ("{{ a|linenumbers }}", {"a": "\n".join([u'x'] * 10)}, "01. x\n02. x\n03. x\n04. x\n05. x\n06. x\n07. x\n08. x\n09. x\n10. x"),
 
         'filter-lower01': ("{% autoescape off %}{{ a|lower }} {{ b|lower }}{% endautoescape %}", {"a": "Apple & banana", "b": mark_safe("Apple &amp; banana")}, "apple & banana apple &amp; banana"),
         'filter-lower02': ("{{ a|lower }} {{ b|lower }}", {"a": "Apple & banana", "b": mark_safe("Apple &amp; banana")}, "apple &amp; banana apple &amp; banana"),
+        'filter-lower03': ("{{ a|lower }}", {"a": "TEST"}, "test"),
+        'filter-lower04': ("{{ a|lower }}", {"a": "\xcb"}, "\xeb"), # uppercase E umlaut
 
         # The make_list filter can destroy existing escaping, so the results are
         # escaped.
@@ -117,11 +152,15 @@ def get_filter_tests():
         'filter-make_list02': ("{{ a|make_list }}", {"a": mark_safe("&")}, str_prefix("[%(_)s&#39;&amp;&#39;]")),
         'filter-make_list03': ('{% autoescape off %}{{ a|make_list|stringformat:"s"|safe }}{% endautoescape %}', {"a": mark_safe("&")}, str_prefix("[%(_)s'&']")),
         'filter-make_list04': ('{{ a|make_list|stringformat:"s"|safe }}', {"a": mark_safe("&")}, str_prefix("[%(_)s'&']")),
+        'filter-make_list05': ('{% autoescape off %}{{ a|make_list }}{% endautoescape %}', {"a": 'abc'}, str_prefix("[%(_)s'a', %(_)s'b', %(_)s'c']")),
+        'filter-make_list06': ('{% autoescape off %}{{ a|make_list }}{% endautoescape %}', {"a": 1234}, str_prefix("[%(_)s'1', %(_)s'2', %(_)s'3', %(_)s'4']")),
 
         # Running slugify on a pre-escaped string leads to odd behavior,
         # but the result is still safe.
         'filter-slugify01': ("{% autoescape off %}{{ a|slugify }} {{ b|slugify }}{% endautoescape %}", {"a": "a & b", "b": mark_safe("a &amp; b")}, "a-b a-amp-b"),
         'filter-slugify02': ("{{ a|slugify }} {{ b|slugify }}", {"a": "a & b", "b": mark_safe("a &amp; b")}, "a-b a-amp-b"),
+        'filter-slugify03': ("{{ a|slugify }}", {"a": " Jack & Jill like numbers 1,2,3 and 4 and silly characters ?%.$!/"}, "jack-jill-like-numbers-123-and-4-and-silly-characters"),
+        'filter-slugify04': ("{{ a|slugify }}", {"a": "Un \xe9l\xe9phant \xe0 l'or\xe9e du bois"}, "un-elephant-a-loree-du-bois"),
 
         # Notice that escaping is applied *after* any filters, so the string
         # formatting here only needs to deal with pre-escaped characters.
@@ -129,15 +168,34 @@ def get_filter_tests():
             {"a": "a<b", "b": mark_safe("a<b")}, ".  a<b. .  a<b."),
         'filter-stringformat02': ('.{{ a|stringformat:"5s" }}. .{{ b|stringformat:"5s" }}.', {"a": "a<b", "b": mark_safe("a<b")},
             ".  a&lt;b. .  a<b."),
+        'filter-stringformat03': ('{{ a|stringformat:"03d" }}', {'a': 1}, '001'),
+        'filter-stringformat04': ('{{ a|stringformat:"z" }}', {'a': 1}, ''),
 
         # Test the title filter
-        'filter-title1' : ('{{ a|title }}', {'a' : 'JOE\'S CRAB SHACK'}, 'Joe&#39;s Crab Shack'),
-        'filter-title2' : ('{{ a|title }}', {'a' : '555 WEST 53RD STREET'}, '555 West 53rd Street'),
+        'filter-title01' : ('{{ a|title }}', {'a' : 'JOE\'S CRAB SHACK'}, 'Joe&#39;s Crab Shack'),
+        'filter-title02' : ('{{ a|title }}', {'a' : '555 WEST 53RD STREET'}, '555 West 53rd Street'),
+        'filter-title03' : ('{% autoescape off %}{{ a|title }}{% endautoescape %}', {'a' : 'a nice title, isn\'t it?'}, 'A Nice Title, Isn\'t It?'),
+        'filter-title04' : ('{{ a|title }}', {'a' : 'discoth\xe8que'}, 'Discoth\xe8que'),
 
         'filter-truncatewords01': ('{% autoescape off %}{{ a|truncatewords:"2" }} {{ b|truncatewords:"2"}}{% endautoescape %}',
             {"a": "alpha & bravo", "b": mark_safe("alpha &amp; bravo")}, "alpha & ... alpha &amp; ..."),
         'filter-truncatewords02': ('{{ a|truncatewords:"2" }} {{ b|truncatewords:"2"}}',
             {"a": "alpha & bravo", "b": mark_safe("alpha &amp; bravo")}, "alpha &amp; ... alpha &amp; ..."),
+        'filter-truncatewords03': ('{{ a|truncatewords:b }}',
+            {"a": "A sentence with a few words in it", "b": 1}, "A ..."),
+        'filter-truncatewords04': ('{{ a|truncatewords:b }}',
+            {"a": "A sentence with a few words in it", "b": 5}, "A sentence with a few ..."),
+        'filter-truncatewords05': ('{{ a|truncatewords:b }}',
+            {"a": "A sentence with a few words in it", "b": 100}, "A sentence with a few words in it"),
+        'filter-truncatewords06': ('{{ a|truncatewords:b }}',
+            {"a": "A sentence with a few words in it", "b": "not a number"}, "A sentence with a few words in it"),
+
+        'filter-truncatewords_html01': ('{{ a|truncatewords_html:b }}', {'a': mark_safe('<p>one <a href="#">two - three <br>four</a> five</p>'), 'b': 0}, ''),
+        'filter-truncatewords_html02': ('{{ a|truncatewords_html:b }}', {'a': mark_safe('<p>one <a href="#">two - three <br>four</a> five</p>'), 'b': 2}, '<p>one <a href="#">two ...</a></p>'),
+        'filter-truncatewords_html03': ('{{ a|truncatewords_html:b }}', {'a': mark_safe('<p>one <a href="#">two - three <br>four</a> five</p>'), 'b': 4}, '<p>one <a href="#">two - three <br>four ...</a></p>'),
+        'filter-truncatewords_html04': ('{{ a|truncatewords_html:b }}', {'a': mark_safe('<p>one <a href="#">two - three <br>four</a> five</p>'), 'b': 5}, '<p>one <a href="#">two - three <br>four</a> five</p>'),
+        'filter-truncatewords_html05': ('{{ a|truncatewords_html:b }}', {'a': mark_safe('<p>one <a href="#">two - three <br>four</a> five</p>'), 'b': 100}, '<p>one <a href="#">two - three <br>four</a> five</p>'),
+        'filter-truncatewords_html06': ('{{ a|truncatewords_html:b }}', {'a': '\xc5ngstr\xf6m was here', 'b': 1}, '\xc5ngstr\xf6m ...'),
 
         'filter-truncatechars01': ('{{ a|truncatechars:5 }}', {'a': "Testing, testing"}, "Te..."),
         'filter-truncatechars02': ('{{ a|truncatechars:7 }}', {'a': "Testing"}, "Testing"),
@@ -146,6 +204,8 @@ def get_filter_tests():
         # so it's not safe for non-escaping purposes.
         'filter-upper01': ('{% autoescape off %}{{ a|upper }} {{ b|upper }}{% endautoescape %}', {"a": "a & b", "b": mark_safe("a &amp; b")}, "A & B A &AMP; B"),
         'filter-upper02': ('{{ a|upper }} {{ b|upper }}', {"a": "a & b", "b": mark_safe("a &amp; b")}, "A &amp; B A &amp;AMP; B"),
+        'filter-upper03': ('{{ a|upper }}', {"a": "Mixed case input"}, "MIXED CASE INPUT"),
+        'filter-upper04': ('{{ a|upper }}', {"a": "\xeb"}, "\xcb"),
 
         'filter-urlize01': ('{% autoescape off %}{{ a|urlize }} {{ b|urlize }}{% endautoescape %}', {"a": "http://example.com/?x=&y=", "b": mark_safe("http://example.com?x=&amp;y=")}, '<a href="http://example.com/?x=&y=" rel="nofollow">http://example.com/?x=&y=</a> <a href="http://example.com?x=&amp;y=" rel="nofollow">http://example.com?x=&amp;y=</a>'),
         'filter-urlize02': ('{{ a|urlize }} {{ b|urlize }}', {"a": "http://example.com/?x=&y=", "b": mark_safe("http://example.com?x=&amp;y=")}, '<a href="http://example.com/?x=&amp;y=" rel="nofollow">http://example.com/?x=&amp;y=</a> <a href="http://example.com?x=&amp;y=" rel="nofollow">http://example.com?x=&amp;y=</a>'),
@@ -161,14 +221,36 @@ def get_filter_tests():
         'filter-urlize07': ('{{ a|urlize }}', {"a": "Email me at me@example.com"}, 'Email me at <a href="mailto:me@example.com">me@example.com</a>'),
         'filter-urlize08': ('{{ a|urlize }}', {"a": "Email me at <me@example.com>"}, 'Email me at &lt;<a href="mailto:me@example.com">me@example.com</a>&gt;'),
 
+        'filter-urlize09': ('{{ a|urlize }}', {'a': 'http://google.com'}, '<a href="http://google.com" rel="nofollow">http://google.com</a>'),
+        'filter-urlize10': ('{{ a|urlize }}', {'a': 'http://google.com/'}, '<a href="http://google.com/" rel="nofollow">http://google.com/</a>'),
+        'filter-urlize11': ('{{ a|urlize }}', {'a': 'www.google.com'}, '<a href="http://www.google.com" rel="nofollow">www.google.com</a>'),
+        'filter-urlize12': ('{{ a|urlize }}', {'a': 'djangoproject.org'}, '<a href="http://djangoproject.org" rel="nofollow">djangoproject.org</a>'),
+        'filter-urlize13': ('{{ a|urlize }}', {'a': 'info@djangoproject.org'}, '<a href="mailto:info@djangoproject.org">info@djangoproject.org</a>'),
+
+        # Check urlize with https addresses
+        'filter-urlize10': ('{{ a|urlize }}', {'a': 'https://google.com'}, '<a href="https://google.com" rel="nofollow">https://google.com</a>'),
+
         'filter-urlizetrunc01': ('{% autoescape off %}{{ a|urlizetrunc:"8" }} {{ b|urlizetrunc:"8" }}{% endautoescape %}', {"a": '"Unsafe" http://example.com/x=&y=', "b": mark_safe('&quot;Safe&quot; http://example.com?x=&amp;y=')}, '"Unsafe" <a href="http://example.com/x=&y=" rel="nofollow">http:...</a> &quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http:...</a>'),
         'filter-urlizetrunc02': ('{{ a|urlizetrunc:"8" }} {{ b|urlizetrunc:"8" }}', {"a": '"Unsafe" http://example.com/x=&y=', "b": mark_safe('&quot;Safe&quot; http://example.com?x=&amp;y=')}, '&quot;Unsafe&quot; <a href="http://example.com/x=&amp;y=" rel="nofollow">http:...</a> &quot;Safe&quot; <a href="http://example.com?x=&amp;y=" rel="nofollow">http:...</a>'),
+        'filter-urlizetrunc03': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://short.com/', 'b': 20}, '<a href="http://short.com/" rel="nofollow">http://short.com/</a>'),
+        'filter-urlizetrunc04': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://www.google.co.uk/search?hl=en&q=some+long+url&btnG=Search&meta=', 'b': 20}, '<a href="http://www.google.co.uk/search?hl=en&q=some+long+url&btnG=Search&meta=" rel="nofollow">http://www.google...</a>'),
+        'filter-urlizetrunc05': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://www.google.co.uk/search?hl=en&q=some+long+url&btnG=Search&meta=', 'b': 20}, '<a href="http://www.google.co.uk/search?hl=en&q=some+long+url&btnG=Search&meta=" rel="nofollow">http://www.google...</a>'),
+        # Check truncating of URIs which are the exact length
+        'filter-urlizetrunc06': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://31characteruri.com/test/', 'b': 31}, '<a href="http://31characteruri.com/test/" rel="nofollow">http://31characteruri.com/test/</a>'),
+        'filter-urlizetrunc07': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://31characteruri.com/test/', 'b': 30}, '<a href="http://31characteruri.com/test/" rel="nofollow">http://31characteruri.com/t...</a>'),
+        'filter-urlizetrunc08': ('{% autoescape off %}{{ a|urlizetrunc:b }}{% endautoescape %}', {'a': 'http://31characteruri.com/test/', 'b': 2}, '<a href="http://31characteruri.com/test/" rel="nofollow">...</a>'),
 
         'filter-wordcount01': ('{% autoescape off %}{{ a|wordcount }} {{ b|wordcount }}{% endautoescape %}', {"a": "a & b", "b": mark_safe("a &amp; b")}, "3 3"),
         'filter-wordcount02': ('{{ a|wordcount }} {{ b|wordcount }}', {"a": "a & b", "b": mark_safe("a &amp; b")}, "3 3"),
+        'filter-wordcount03': ('{{ a|wordcount }}', {"a": ""}, "0"),
+        'filter-wordcount04': ('{{ a|wordcount }}', {"a": "oneword"}, "1"),
+        'filter-wordcount05': ('{{ a|wordcount }}', {"a": "lots of words"}, "3"),
 
         'filter-wordwrap01': ('{% autoescape off %}{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}{% endautoescape %}', {"a": "a & b", "b": mark_safe("a & b")}, "a &\nb a &\nb"),
         'filter-wordwrap02': ('{{ a|wordwrap:"3" }} {{ b|wordwrap:"3" }}', {"a": "a & b", "b": mark_safe("a & b")}, "a &amp;\nb a &\nb"),
+        'filter-wordwrap03': ('{{ a|wordwrap:b }}', {"a": mark_safe("this is a long paragraph of text that really needs to be wrapped I\'m afraid"), "b": 14}, "this is a long\nparagraph of\ntext that\nreally needs\nto be wrapped\nI'm afraid"),
+        'filter-wordwrap04': ('{{ a|wordwrap:b }}', {"a": "this is a short paragraph of text.\n  But this line should be indented", "b": 14}, "this is a\nshort\nparagraph of\ntext.\n  But this\nline should be\nindented"),
+        'filter-wordwrap05': ('{{ a|wordwrap:b }}', {"a": "this is a short paragraph of text.\n  But this line should be indented", "b": 15}, "this is a short\nparagraph of\ntext.\n  But this line\nshould be\nindented"),
 
         'filter-ljust01': ('{% autoescape off %}.{{ a|ljust:"5" }}. .{{ b|ljust:"5" }}.{% endautoescape %}', {"a": "a&b", "b": mark_safe("a&b")}, ".a&b  . .a&b  ."),
         'filter-ljust02': ('.{{ a|ljust:"5" }}. .{{ b|ljust:"5" }}.', {"a": "a&b", "b": mark_safe("a&b")}, ".a&amp;b  . .a&b  ."),
@@ -272,10 +354,14 @@ def get_filter_tests():
         'filter-iriencode02': ('{% autoescape off %}{{ url|iriencode }}{% endautoescape %}', {'url': '?test=1&me=2'}, '?test=1&me=2'),
         'filter-iriencode03': ('{{ url|iriencode }}', {'url': mark_safe('?test=1&me=2')}, '?test=1&me=2'),
         'filter-iriencode04': ('{% autoescape off %}{{ url|iriencode }}{% endautoescape %}', {'url': mark_safe('?test=1&me=2')}, '?test=1&me=2'),
+        'filter-iriencode05': ('{{ a|iriencode }}', {'a': 'S\xf8r-Tr\xf8ndelag'}, 'S%C3%B8r-Tr%C3%B8ndelag'),
+        'filter-iriencode06': ('{{ a|urlencode|iriencode }}', {'a': 'fran\xe7ois & jill'}, 'fran%C3%A7ois%20%26%20jill'),
 
         # urlencode
         'filter-urlencode01': ('{{ url|urlencode }}', {'url': '/test&"/me?/'}, '/test%26%22/me%3F/'),
         'filter-urlencode02': ('/test/{{ urlbit|urlencode:"" }}/', {'urlbit': 'escape/slash'}, '/test/escape%2Fslash/'),
+        'filter-urlencode03': ('{{ a|urlencode }}', {'a': 'fran\xe7ois & jill'}, 'fran%C3%A7ois%20%26%20jill'),
+        'filter-urlencode04': ('{{ a|urlencode }}', {'a': 1}, '1'),
 
         # Chaining a bunch of safeness-preserving filters should not alter
         # the safe status either way.
@@ -307,9 +393,13 @@ def get_filter_tests():
         'autoescape-stringfilter03': (r'{{ safe|capfirst }}', {'safe': SafeClass()}, 'You &gt; me'),
         'autoescape-stringfilter04': (r'{% autoescape off %}{{ safe|capfirst }}{% endautoescape %}', {'safe': SafeClass()}, 'You &gt; me'),
 
-        'escapejs01': (r'{{ a|escapejs }}', {'a': 'testing\r\njavascript \'string" <b>escaping</b>'}, 'testing\\u000D\\u000Ajavascript \\u0027string\\u0022 \\u003Cb\\u003Eescaping\\u003C/b\\u003E'),
-        'escapejs02': (r'{% autoescape off %}{{ a|escapejs }}{% endautoescape %}', {'a': 'testing\r\njavascript \'string" <b>escaping</b>'}, 'testing\\u000D\\u000Ajavascript \\u0027string\\u0022 \\u003Cb\\u003Eescaping\\u003C/b\\u003E'),
-
+        'escapejs01': ('{{ a|escapejs }}', {'a': 'testing\r\njavascript \'string" <b>escaping</b>'}, 'testing\\u000D\\u000Ajavascript \\u0027string\\u0022 \\u003Cb\\u003Eescaping\\u003C/b\\u003E'),
+        'escapejs02': ('{% autoescape off %}{{ a|escapejs }}{% endautoescape %}', {'a': 'testing\r\njavascript \'string" <b>escaping</b>'}, 'testing\\u000D\\u000Ajavascript \\u0027string\\u0022 \\u003Cb\\u003Eescaping\\u003C/b\\u003E'),
+        'escapejs03': ('{{ a|escapejs }}', {'a': '"double quotes" and \'single quotes\''}, '\\u0022double quotes\\u0022 and \\u0027single quotes\\u0027'),
+        'escapejs04': ('{{ a|escapejs }}', {'a': r'\ : backslashes, too'}, '\\u005C : backslashes, too'),
+        'escapejs05': ('{{ a|escapejs }}', {'a': 'and lots of whitespace: \r\n\t\v\f\b'}, 'and lots of whitespace: \\u000D\\u000A\\u0009\\u000B\\u000C\\u0008'),
+        'escapejs06': ('{{ a|escapejs }}', {'a': r'<script>and this</script>'}, '\\u003Cscript\\u003Eand this\\u003C/script\\u003E'),
+        'escapejs07': ('{{ a|escapejs }}', {'a': 'paragraph separator:\u2029and line separator:\u2028'}, 'paragraph separator:\\u2029and line separator:\\u2028'),
 
         # length filter.
         'length01': ('{{ list|length }}', {'list': ['4', None, True, {}]}, '4'),
