@@ -49,7 +49,7 @@ from .response import (TemplateResponseTest, CacheMiddlewareTest,
 try:
     from .loaders import RenderToStringTest, EggLoaderTest
 except ImportError as e:
-    if "pkg_resources" in e.args[0]:
+    if 'pkg_resources' in e.args[0]:
         pass # If setuptools isn't installed, that's fine. Just move on.
     else:
         raise
@@ -73,7 +73,7 @@ class EchoNode(template.Node):
         self.contents = contents
 
     def render(self, context):
-        return " ".join(self.contents)
+        return ' '.join(self.contents)
 
 def do_echo(parser, token):
     return EchoNode(token.contents.split()[1:])
@@ -81,9 +81,9 @@ def do_echo(parser, token):
 def do_upper(value):
     return value.upper()
 
-register.tag("echo", do_echo)
-register.tag("other_echo", do_echo)
-register.filter("upper", do_upper)
+register.tag('echo', do_echo)
+register.tag('other_echo', do_echo)
+register.filter('upper', do_upper)
 
 template.libraries['testtags'] = register
 
@@ -108,7 +108,7 @@ class SomeClass:
         self.otherclass = OtherClass()
 
     def method(self):
-        return "SomeClass.method"
+        return 'SomeClass.method'
 
     def method2(self, o):
         return o
@@ -136,7 +136,7 @@ class SomeClass:
 
 class OtherClass:
     def method(self):
-        return "OtherClass.method"
+        return 'OtherClass.method'
 
 class TestObj(object):
     def is_true(self):
@@ -163,7 +163,7 @@ class UTF8Class:
     def __str__(self):
         return 'ŠĐĆŽćžšđ'
 
-@override_settings(MEDIA_URL="/media/", STATIC_URL="/static/")
+@override_settings(MEDIA_URL='/media/', STATIC_URL='/static/')
 class Templates(TestCase):
 
     def test_loaders_security(self):
@@ -384,14 +384,14 @@ class Templates(TestCase):
                 tb = tb.tb_next
                 depth += 1
             self.assertTrue(depth > 5,
-                "The traceback context was lost when reraising the traceback. See #19827")
+                'The traceback context was lost when reraising the traceback. See #19827')
 
     def test_url_explicit_exception_for_old_syntax_at_run_time(self):
         # Regression test for #19280
         t = Template('{% url path.to.view %}')      # not quoted = old syntax
         c = Context()
         with six.assertRaisesRegex(self, urlresolvers.NoReverseMatch,
-                "The syntax changed in Django 1.5, see the docs."):
+                'The syntax changed in Django 1.5, see the docs.'):
             t.render(c)
 
     def test_url_explicit_exception_for_old_syntax_at_compile_time(self):
@@ -406,8 +406,8 @@ class Templates(TestCase):
         The template system doesn't wrap exceptions, but annotates them.
         Refs #16770
         """
-        c = Context({"coconuts": lambda: 42 / 0})
-        t = Template("{{ coconuts }}")
+        c = Context({'coconuts': lambda: 42 / 0})
+        t = Template('{{ coconuts }}')
         with self.assertRaises(ZeroDivisionError) as cm:
             t.render(c)
 
@@ -416,7 +416,7 @@ class Templates(TestCase):
     def test_invalid_block_suggestion(self):
         # See #7876
         try:
-            t = Template("{% if 1 %}lala{% endblock %}{% endif %}")
+            t = Template('{% if 1 %}lala{% endblock %}{% endif %}')
         except TemplateSyntaxError as e:
             self.assertEqual(e.args[0], "Invalid block tag: 'endblock', expected 'elif', 'else' or 'endif'")
 
@@ -483,7 +483,7 @@ class Templates(TestCase):
         # Warm the URL reversing cache. This ensures we don't pay the cost
         # warming the cache during one of the tests.
         urlresolvers.reverse('template_tests.views.client_action',
-                             kwargs={'id':0,'action':"update"})
+                             kwargs={'id':0,'action':'update'})
 
         for name, vals in tests:
             if isinstance(vals[2], tuple):
@@ -522,7 +522,7 @@ class Templates(TestCase):
                         try:
                             with warnings.catch_warnings():
                                 # Ignore pending deprecations of the old syntax of the 'cycle' and 'firstof' tags.
-                                warnings.filterwarnings("ignore", category=PendingDeprecationWarning, module='django.template.base')
+                                warnings.filterwarnings('ignore', category=PendingDeprecationWarning, module='django.template.base')
                                 test_template = loader.get_template(name)
                         except ShouldNotExecuteException:
                             failures.append("Template test (Cached='%s', TEMPLATE_STRING_IF_INVALID='%s', TEMPLATE_DEBUG=%s): %s -- FAILED. Template loading invoked method that shouldn't have been invoked." % (is_cached, invalid_str, template_debug, name))
@@ -557,8 +557,8 @@ class Templates(TestCase):
         settings.TEMPLATE_STRING_IF_INVALID = old_invalid
         settings.ALLOWED_INCLUDE_ROOTS = old_allowed_include_roots
 
-        self.assertEqual(failures, [], "Tests failed:\n%s\n%s" %
-            ('-'*70, ("\n%s\n" % ('-'*70)).join(failures)))
+        self.assertEqual(failures, [], 'Tests failed:\n%s\n%s' %
+            ('-'*70, ('\n%s\n' % ('-'*70)).join(failures)))
 
     def render(self, test_template, vals):
         context = template.Context(vals[1])
@@ -576,171 +576,171 @@ class Templates(TestCase):
             ### BASIC SYNTAX ################################################
 
             # Plain text should go through the template parser untouched
-            'basic-syntax01': ("something cool", {}, "something cool"),
+            'basic-syntax01': ('something cool', {}, 'something cool'),
 
             # Variables should be replaced with their value in the current
             # context
-            'basic-syntax02': ("{{ headline }}", {'headline':'Success'}, "Success"),
+            'basic-syntax02': ('{{ headline }}', {'headline':'Success'}, 'Success'),
 
             # More than one replacement variable is allowed in a template
-            'basic-syntax03': ("{{ first }} --- {{ second }}", {"first" : 1, "second" : 2}, "1 --- 2"),
+            'basic-syntax03': ('{{ first }} --- {{ second }}', {'first' : 1, 'second' : 2}, '1 --- 2'),
 
             # Fail silently when a variable is not found in the current context
-            'basic-syntax04': ("as{{ missing }}df", {}, ("asdf","asINVALIDdf")),
+            'basic-syntax04': ('as{{ missing }}df', {}, ('asdf','asINVALIDdf')),
 
             # A variable may not contain more than one word
-            'basic-syntax06': ("{{ multi word variable }}", {}, template.TemplateSyntaxError),
+            'basic-syntax06': ('{{ multi word variable }}', {}, template.TemplateSyntaxError),
 
             # Raise TemplateSyntaxError for empty variable tags
-            'basic-syntax07': ("{{ }}",        {}, template.TemplateSyntaxError),
-            'basic-syntax08': ("{{        }}", {}, template.TemplateSyntaxError),
+            'basic-syntax07': ('{{ }}',        {}, template.TemplateSyntaxError),
+            'basic-syntax08': ('{{        }}', {}, template.TemplateSyntaxError),
 
             # Attribute syntax allows a template to call an object's attribute
-            'basic-syntax09': ("{{ var.method }}", {"var": SomeClass()}, "SomeClass.method"),
+            'basic-syntax09': ('{{ var.method }}', {'var': SomeClass()}, 'SomeClass.method'),
 
             # Multiple levels of attribute access are allowed
-            'basic-syntax10': ("{{ var.otherclass.method }}", {"var": SomeClass()}, "OtherClass.method"),
+            'basic-syntax10': ('{{ var.otherclass.method }}', {'var': SomeClass()}, 'OtherClass.method'),
 
             # Fail silently when a variable's attribute isn't found
-            'basic-syntax11': ("{{ var.blech }}", {"var": SomeClass()}, ("","INVALID")),
+            'basic-syntax11': ('{{ var.blech }}', {'var': SomeClass()}, ('','INVALID')),
 
             # Raise TemplateSyntaxError when trying to access a variable beginning with an underscore
-            'basic-syntax12': ("{{ var.__dict__ }}", {"var": SomeClass()}, template.TemplateSyntaxError),
+            'basic-syntax12': ('{{ var.__dict__ }}', {'var': SomeClass()}, template.TemplateSyntaxError),
 
             # Raise TemplateSyntaxError when trying to access a variable containing an illegal character
-            'basic-syntax13': ("{{ va>r }}", {}, template.TemplateSyntaxError),
-            'basic-syntax14': ("{{ (var.r) }}", {}, template.TemplateSyntaxError),
-            'basic-syntax15': ("{{ sp%am }}", {}, template.TemplateSyntaxError),
-            'basic-syntax16': ("{{ eggs! }}", {}, template.TemplateSyntaxError),
-            'basic-syntax17': ("{{ moo? }}", {}, template.TemplateSyntaxError),
+            'basic-syntax13': ('{{ va>r }}', {}, template.TemplateSyntaxError),
+            'basic-syntax14': ('{{ (var.r) }}', {}, template.TemplateSyntaxError),
+            'basic-syntax15': ('{{ sp%am }}', {}, template.TemplateSyntaxError),
+            'basic-syntax16': ('{{ eggs! }}', {}, template.TemplateSyntaxError),
+            'basic-syntax17': ('{{ moo? }}', {}, template.TemplateSyntaxError),
 
             # Attribute syntax allows a template to call a dictionary key's value
-            'basic-syntax18': ("{{ foo.bar }}", {"foo" : {"bar" : "baz"}}, "baz"),
+            'basic-syntax18': ('{{ foo.bar }}', {'foo' : {'bar' : 'baz'}}, 'baz'),
 
             # Fail silently when a variable's dictionary key isn't found
-            'basic-syntax19': ("{{ foo.spam }}", {"foo" : {"bar" : "baz"}}, ("","INVALID")),
+            'basic-syntax19': ('{{ foo.spam }}', {'foo' : {'bar' : 'baz'}}, ('','INVALID')),
 
             # Fail silently when accessing a non-simple method
-            'basic-syntax20': ("{{ var.method2 }}", {"var": SomeClass()}, ("","INVALID")),
+            'basic-syntax20': ('{{ var.method2 }}', {'var': SomeClass()}, ('','INVALID')),
 
             # Don't get confused when parsing something that is almost, but not
             # quite, a template tag.
-            'basic-syntax21': ("a {{ moo %} b", {}, "a {{ moo %} b"),
-            'basic-syntax22': ("{{ moo #}", {}, "{{ moo #}"),
+            'basic-syntax21': ('a {{ moo %} b', {}, 'a {{ moo %} b'),
+            'basic-syntax22': ('{{ moo #}', {}, '{{ moo #}'),
 
-            # Will try to treat "moo #} {{ cow" as the variable. Not ideal, but
+            # Will try to treat 'moo #} {{ cow' as the variable. Not ideal, but
             # costly to work around, so this triggers an error.
-            'basic-syntax23': ("{{ moo #} {{ cow }}", {"cow": "cow"}, template.TemplateSyntaxError),
+            'basic-syntax23': ('{{ moo #} {{ cow }}', {'cow': 'cow'}, template.TemplateSyntaxError),
 
             # Embedded newlines make it not-a-tag.
-            'basic-syntax24': ("{{ moo\n }}", {}, "{{ moo\n }}"),
+            'basic-syntax24': ('{{ moo\n }}', {}, '{{ moo\n }}'),
 
             # Literal strings are permitted inside variables, mostly for i18n
             # purposes.
-            'basic-syntax25': ('{{ "fred" }}', {}, "fred"),
+            'basic-syntax25': ("{{ 'fred' }}", {}, 'fred'),
             'basic-syntax26': (r'{{ "\"fred\"" }}', {}, "\"fred\""),
             'basic-syntax27': (r'{{ _("\"fred\"") }}', {}, "\"fred\""),
 
             # regression test for ticket #12554
             # make sure a silent_variable_failure Exception is supressed
             # on dictionary and attribute lookup
-            'basic-syntax28': ("{{ a.b }}", {'a': SilentGetItemClass()}, ('', 'INVALID')),
-            'basic-syntax29': ("{{ a.b }}", {'a': SilentAttrClass()}, ('', 'INVALID')),
+            'basic-syntax28': ('{{ a.b }}', {'a': SilentGetItemClass()}, ('', 'INVALID')),
+            'basic-syntax29': ('{{ a.b }}', {'a': SilentAttrClass()}, ('', 'INVALID')),
 
             # Something that starts like a number but has an extra lookup works as a lookup.
-            'basic-syntax30': ("{{ 1.2.3 }}", {"1": {"2": {"3": "d"}}}, "d"),
-            'basic-syntax31': ("{{ 1.2.3 }}", {"1": {"2": ("a", "b", "c", "d")}}, "d"),
-            'basic-syntax32': ("{{ 1.2.3 }}", {"1": (("x", "x", "x", "x"), ("y", "y", "y", "y"), ("a", "b", "c", "d"))}, "d"),
-            'basic-syntax33': ("{{ 1.2.3 }}", {"1": ("xxxx", "yyyy", "abcd")}, "d"),
-            'basic-syntax34': ("{{ 1.2.3 }}", {"1": ({"x": "x"}, {"y": "y"}, {"z": "z", "3": "d"})}, "d"),
+            'basic-syntax30': ('{{ 1.2.3 }}', {'1': {'2': {'3': 'd'}}}, 'd'),
+            'basic-syntax31': ('{{ 1.2.3 }}', {'1': {'2': ('a', 'b', 'c', 'd')}}, 'd'),
+            'basic-syntax32': ('{{ 1.2.3 }}', {'1': (('x', 'x', 'x', 'x'), ('y', 'y', 'y', 'y'), ('a', 'b', 'c', 'd'))}, 'd'),
+            'basic-syntax33': ('{{ 1.2.3 }}', {'1': ('xxxx', 'yyyy', 'abcd')}, 'd'),
+            'basic-syntax34': ('{{ 1.2.3 }}', {'1': ({'x': 'x'}, {'y': 'y'}, {'z': 'z', '3': 'd'})}, 'd'),
 
             # Numbers are numbers even if their digits are in the context.
-            'basic-syntax35': ("{{ 1 }}", {"1": "abc"}, "1"),
-            'basic-syntax36': ("{{ 1.2 }}", {"1": "abc"}, "1.2"),
+            'basic-syntax35': ('{{ 1 }}', {'1': 'abc'}, '1'),
+            'basic-syntax36': ('{{ 1.2 }}', {'1': 'abc'}, '1.2'),
 
             # Call methods in the top level of the context
-            'basic-syntax37': ('{{ callable }}', {"callable": lambda: "foo bar"}, "foo bar"),
+            'basic-syntax37': ('{{ callable }}', {'callable': lambda: 'foo bar'}, 'foo bar'),
 
             # Call methods returned from dictionary lookups
-            'basic-syntax38': ('{{ var.callable }}', {"var": {"callable": lambda: "foo bar"}}, "foo bar"),
+            'basic-syntax38': ('{{ var.callable }}', {'var': {'callable': lambda: 'foo bar'}}, 'foo bar'),
 
-            'builtins01': ('{{ True }}', {}, "True"),
-            'builtins02': ('{{ False }}', {}, "False"),
-            'builtins03': ('{{ None }}', {}, "None"),
+            'builtins01': ('{{ True }}', {}, 'True'),
+            'builtins02': ('{{ False }}', {}, 'False'),
+            'builtins03': ('{{ None }}', {}, 'None'),
 
             # List-index syntax allows a template to access a certain item of a subscriptable object.
-            'list-index01': ("{{ var.1 }}", {"var": ["first item", "second item"]}, "second item"),
+            'list-index01': ('{{ var.1 }}', {'var': ['first item', 'second item']}, 'second item'),
 
             # Fail silently when the list index is out of range.
-            'list-index02': ("{{ var.5 }}", {"var": ["first item", "second item"]}, ("", "INVALID")),
+            'list-index02': ('{{ var.5 }}', {'var': ['first item', 'second item']}, ('', 'INVALID')),
 
             # Fail silently when the variable is not a subscriptable object.
-            'list-index03': ("{{ var.1 }}", {"var": None}, ("", "INVALID")),
+            'list-index03': ('{{ var.1 }}', {'var': None}, ('', 'INVALID')),
 
             # Fail silently when variable is a dict without the specified key.
-            'list-index04': ("{{ var.1 }}", {"var": {}}, ("", "INVALID")),
+            'list-index04': ('{{ var.1 }}', {'var': {}}, ('', 'INVALID')),
 
             # Dictionary lookup wins out when dict's key is a string.
-            'list-index05': ("{{ var.1 }}", {"var": {'1': "hello"}}, "hello"),
+            'list-index05': ('{{ var.1 }}', {'var': {'1': 'hello'}}, 'hello'),
 
             # But list-index lookup wins out when dict's key is an int, which
             # behind the scenes is really a dictionary lookup (for a dict)
             # after converting the key to an int.
-            'list-index06': ("{{ var.1 }}", {"var": {1: "hello"}}, "hello"),
+            'list-index06': ('{{ var.1 }}', {'var': {1: 'hello'}}, 'hello'),
 
             # Dictionary lookup wins out when there is a string and int version of the key.
-            'list-index07': ("{{ var.1 }}", {"var": {'1': "hello", 1: "world"}}, "hello"),
+            'list-index07': ('{{ var.1 }}', {'var': {'1': 'hello', 1: 'world'}}, 'hello'),
 
             # Basic filter usage
-            'filter-syntax01': ("{{ var|upper }}", {"var": "Django is the greatest!"}, "DJANGO IS THE GREATEST!"),
+            'filter-syntax01': ('{{ var|upper }}', {'var': 'Django is the greatest!'}, 'DJANGO IS THE GREATEST!'),
 
             # Chained filters
-            'filter-syntax02': ("{{ var|upper|lower }}", {"var": "Django is the greatest!"}, "django is the greatest!"),
+            'filter-syntax02': ('{{ var|upper|lower }}', {'var': 'Django is the greatest!'}, 'django is the greatest!'),
 
             # Allow spaces before the filter pipe
-            'filter-syntax03': ("{{ var |upper }}", {"var": "Django is the greatest!"}, "DJANGO IS THE GREATEST!"),
+            'filter-syntax03': ('{{ var |upper }}', {'var': 'Django is the greatest!'}, 'DJANGO IS THE GREATEST!'),
 
             # Allow spaces after the filter pipe
-            'filter-syntax04': ("{{ var| upper }}", {"var": "Django is the greatest!"}, "DJANGO IS THE GREATEST!"),
+            'filter-syntax04': ('{{ var| upper }}', {'var': 'Django is the greatest!'}, 'DJANGO IS THE GREATEST!'),
 
             # Raise TemplateSyntaxError for a nonexistent filter
-            'filter-syntax05': ("{{ var|does_not_exist }}", {}, template.TemplateSyntaxError),
+            'filter-syntax05': ('{{ var|does_not_exist }}', {}, template.TemplateSyntaxError),
 
             # Raise TemplateSyntaxError when trying to access a filter containing an illegal character
-            'filter-syntax06': ("{{ var|fil(ter) }}", {}, template.TemplateSyntaxError),
+            'filter-syntax06': ('{{ var|fil(ter) }}', {}, template.TemplateSyntaxError),
 
             # Raise TemplateSyntaxError for invalid block tags
-            'filter-syntax07': ("{% nothing_to_see_here %}", {}, template.TemplateSyntaxError),
+            'filter-syntax07': ('{% nothing_to_see_here %}', {}, template.TemplateSyntaxError),
 
             # Raise TemplateSyntaxError for empty block tags
-            'filter-syntax08': ("{% %}", {}, template.TemplateSyntaxError),
+            'filter-syntax08': ('{% %}', {}, template.TemplateSyntaxError),
 
             # Chained filters, with an argument to the first one
-            'filter-syntax09': ('{{ var|removetags:"b i"|upper|lower }}', {"var": "<b><i>Yes</i></b>"}, "yes"),
+            'filter-syntax09': ('{{ var|removetags:"b i"|upper|lower }}', {'var': '<b><i>Yes</i></b>'}, 'yes'),
 
             # Literal string as argument is always "safe" from auto-escaping..
             'filter-syntax10': (r'{{ var|default_if_none:" endquote\" hah" }}',
-                    {"var": None}, ' endquote" hah'),
+                    {'var': None}, ' endquote" hah'),
 
             # Variable as argument
-            'filter-syntax11': (r'{{ var|default_if_none:var2 }}', {"var": None, "var2": "happy"}, 'happy'),
+            'filter-syntax11': (r'{{ var|default_if_none:var2 }}', {'var': None, 'var2': 'happy'}, 'happy'),
 
             # Default argument testing
-            'filter-syntax12': (r'{{ var|yesno:"yup,nup,mup" }} {{ var|yesno }}', {"var": True}, 'yup yes'),
+            'filter-syntax12': (r'{{ var|yesno:"yup,nup,mup" }} {{ var|yesno }}', {'var': True}, 'yup yes'),
 
             # Fail silently for methods that raise an exception with a
-            # "silent_variable_failure" attribute
-            'filter-syntax13': (r'1{{ var.method3 }}2', {"var": SomeClass()}, ("12", "1INVALID2")),
+            # 'silent_variable_failure' attribute
+            'filter-syntax13': (r'1{{ var.method3 }}2', {'var': SomeClass()}, ('12', '1INVALID2')),
 
             # In methods that raise an exception without a
-            # "silent_variable_attribute" set to True, the exception propagates
-            'filter-syntax14': (r'1{{ var.method4 }}2', {"var": SomeClass()}, (SomeOtherException, SomeOtherException)),
+            # 'silent_variable_attribute' set to True, the exception propagates
+            'filter-syntax14': (r'1{{ var.method4 }}2', {'var': SomeClass()}, (SomeOtherException, SomeOtherException)),
 
             # Escaped backslash in argument
-            'filter-syntax15': (r'{{ var|default_if_none:"foo\bar" }}', {"var": None}, r'foo\bar'),
+            'filter-syntax15': (r"{{ var|default_if_none:'foo\bar' }}", {'var': None}, r'foo\bar'),
 
             # Escaped backslash using known escape char
-            'filter-syntax16': (r'{{ var|default_if_none:"foo\now" }}', {"var": None}, r'foo\now'),
+            'filter-syntax16': (r"{{ var|default_if_none:'foo\now' }}", {'var': None}, r'foo\now'),
 
             # Empty strings can be passed as arguments to filters
             'filter-syntax17': (r'{{ var|join:"" }}', {'var': ['a', 'b', 'c']}, 'abc'),
@@ -750,46 +750,46 @@ class Templates(TestCase):
             'filter-syntax18': (r'{{ var }}', {'var': UTF8Class()}, '\u0160\u0110\u0106\u017d\u0107\u017e\u0161\u0111'),
 
             # Numbers as filter arguments should work
-            'filter-syntax19': ('{{ var|truncatewords:1 }}', {"var": "hello world"}, "hello ..."),
+            'filter-syntax19': ('{{ var|truncatewords:1 }}', {'var': 'hello world'}, 'hello ...'),
 
             #filters should accept empty string constants
-            'filter-syntax20': ('{{ ""|default_if_none:"was none" }}', {}, ""),
+            'filter-syntax20': ('{{ ""|default_if_none:"was none" }}', {}, ''),
 
             # Fail silently for non-callable attribute and dict lookups which
-            # raise an exception with a "silent_variable_failure" attribute
-            'filter-syntax21': (r'1{{ var.silent_fail_key }}2', {"var": SomeClass()}, ("12", "1INVALID2")),
-            'filter-syntax22': (r'1{{ var.silent_fail_attribute }}2', {"var": SomeClass()}, ("12", "1INVALID2")),
+            # raise an exception with a 'silent_variable_failure' attribute
+            'filter-syntax21': (r'1{{ var.silent_fail_key }}2', {'var': SomeClass()}, ('12', '1INVALID2')),
+            'filter-syntax22': (r'1{{ var.silent_fail_attribute }}2', {'var': SomeClass()}, ('12', '1INVALID2')),
 
             # In attribute and dict lookups that raise an unexpected exception
-            # without a "silent_variable_attribute" set to True, the exception
+            # without a 'silent_variable_attribute' set to True, the exception
             # propagates
-            'filter-syntax23': (r'1{{ var.noisy_fail_key }}2', {"var": SomeClass()}, (SomeOtherException, SomeOtherException)),
-            'filter-syntax24': (r'1{{ var.noisy_fail_attribute }}2', {"var": SomeClass()}, (SomeOtherException, SomeOtherException)),
+            'filter-syntax23': (r'1{{ var.noisy_fail_key }}2', {'var': SomeClass()}, (SomeOtherException, SomeOtherException)),
+            'filter-syntax24': (r'1{{ var.noisy_fail_attribute }}2', {'var': SomeClass()}, (SomeOtherException, SomeOtherException)),
 
             ### COMMENT SYNTAX ########################################################
-            'comment-syntax01': ("{# this is hidden #}hello", {}, "hello"),
-            'comment-syntax02': ("{# this is hidden #}hello{# foo #}", {}, "hello"),
+            'comment-syntax01': ('{# this is hidden #}hello', {}, 'hello'),
+            'comment-syntax02': ('{# this is hidden #}hello{# foo #}', {}, 'hello'),
 
             # Comments can contain invalid stuff.
-            'comment-syntax03': ("foo{#  {% if %}  #}", {}, "foo"),
-            'comment-syntax04': ("foo{#  {% endblock %}  #}", {}, "foo"),
-            'comment-syntax05': ("foo{#  {% somerandomtag %}  #}", {}, "foo"),
-            'comment-syntax06': ("foo{# {% #}", {}, "foo"),
-            'comment-syntax07': ("foo{# %} #}", {}, "foo"),
-            'comment-syntax08': ("foo{# %} #}bar", {}, "foobar"),
-            'comment-syntax09': ("foo{# {{ #}", {}, "foo"),
-            'comment-syntax10': ("foo{# }} #}", {}, "foo"),
-            'comment-syntax11': ("foo{# { #}", {}, "foo"),
-            'comment-syntax12': ("foo{# } #}", {}, "foo"),
+            'comment-syntax03': ('foo{#  {% if %}  #}', {}, 'foo'),
+            'comment-syntax04': ('foo{#  {% endblock %}  #}', {}, 'foo'),
+            'comment-syntax05': ('foo{#  {% somerandomtag %}  #}', {}, 'foo'),
+            'comment-syntax06': ('foo{# {% #}', {}, 'foo'),
+            'comment-syntax07': ('foo{# %} #}', {}, 'foo'),
+            'comment-syntax08': ('foo{# %} #}bar', {}, 'foobar'),
+            'comment-syntax09': ('foo{# {{ #}', {}, 'foo'),
+            'comment-syntax10': ('foo{# }} #}', {}, 'foo'),
+            'comment-syntax11': ('foo{# { #}', {}, 'foo'),
+            'comment-syntax12': ('foo{# } #}', {}, 'foo'),
 
             ### COMMENT TAG ###########################################################
-            'comment-tag01': ("{% comment %}this is hidden{% endcomment %}hello", {}, "hello"),
-            'comment-tag02': ("{% comment %}this is hidden{% endcomment %}hello{% comment %}foo{% endcomment %}", {}, "hello"),
+            'comment-tag01': ('{% comment %}this is hidden{% endcomment %}hello', {}, 'hello'),
+            'comment-tag02': ('{% comment %}this is hidden{% endcomment %}hello{% comment %}foo{% endcomment %}', {}, 'hello'),
 
             # Comment tag can contain invalid stuff.
-            'comment-tag03': ("foo{% comment %} {% if %} {% endcomment %}", {}, "foo"),
-            'comment-tag04': ("foo{% comment %} {% endblock %} {% endcomment %}", {}, "foo"),
-            'comment-tag05': ("foo{% comment %} {% somerandomtag %} {% endcomment %}", {}, "foo"),
+            'comment-tag03': ('foo{% comment %} {% if %} {% endcomment %}', {}, 'foo'),
+            'comment-tag04': ('foo{% comment %} {% endblock %} {% endcomment %}', {}, 'foo'),
+            'comment-tag05': ('foo{% comment %} {% somerandomtag %} {% endcomment %}', {}, 'foo'),
 
             ### CYCLE TAG #############################################################
             'cycle01': ('{% cycle a %}', {}, template.TemplateSyntaxError),
@@ -800,23 +800,23 @@ class Templates(TestCase):
             'cycle06': ('{% cycle a %}', {}, template.TemplateSyntaxError),
             'cycle07': ('{% cycle a,b,c as foo %}{% cycle bar %}', {}, template.TemplateSyntaxError),
             'cycle08': ('{% cycle a,b,c as foo %}{% cycle foo %}{{ foo }}{{ foo }}{% cycle foo %}{{ foo }}', {}, 'abbbcc'),
-            'cycle09': ("{% for i in test %}{% cycle a,b %}{{ i }},{% endfor %}", {'test': range(5)}, 'a0,b1,a2,b3,a4,'),
+            'cycle09': ('{% for i in test %}{% cycle a,b %}{{ i }},{% endfor %}', {'test': range(5)}, 'a0,b1,a2,b3,a4,'),
             'cycle10': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}", {}, 'ab'),
             'cycle11': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}{% cycle abc %}", {}, 'abc'),
             'cycle12': ("{% cycle 'a' 'b' 'c' as abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}", {}, 'abca'),
             'cycle13': ("{% for i in test %}{% cycle 'a' 'b' %}{{ i }},{% endfor %}", {'test': range(5)}, 'a0,b1,a2,b3,a4,'),
-            'cycle14': ("{% cycle one two as foo %}{% cycle foo %}", {'one': '1','two': '2'}, '12'),
-            'cycle15': ("{% for i in test %}{% cycle aye bee %}{{ i }},{% endfor %}", {'test': range(5), 'aye': 'a', 'bee': 'b'}, 'a0,b1,a2,b3,a4,'),
-            'cycle16': ("{% cycle one|lower two as foo %}{% cycle foo %}", {'one': 'A','two': '2'}, 'a2'),
-            'cycle17': ("{% cycle 'a' 'b' 'c' as abc silent %}{% cycle abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}", {}, ""),
+            'cycle14': ('{% cycle one two as foo %}{% cycle foo %}', {'one': '1','two': '2'}, '12'),
+            'cycle15': ('{% for i in test %}{% cycle aye bee %}{{ i }},{% endfor %}', {'test': range(5), 'aye': 'a', 'bee': 'b'}, 'a0,b1,a2,b3,a4,'),
+            'cycle16': ('{% cycle one|lower two as foo %}{% cycle foo %}', {'one': 'A','two': '2'}, 'a2'),
+            'cycle17': ("{% cycle 'a' 'b' 'c' as abc silent %}{% cycle abc %}{% cycle abc %}{% cycle abc %}{% cycle abc %}", {}, ''),
             'cycle18': ("{% cycle 'a' 'b' 'c' as foo invalid_flag %}", {}, template.TemplateSyntaxError),
-            'cycle19': ("{% cycle 'a' 'b' as silent %}{% cycle silent %}", {}, "ab"),
-            'cycle20': ("{% cycle one two as foo %} &amp; {% cycle foo %}", {'one' : 'A & B', 'two' : 'C & D'}, "A & B &amp; C & D"),
-            'cycle21': ("{% filter force_escape %}{% cycle one two as foo %} & {% cycle foo %}{% endfilter %}", {'one' : 'A & B', 'two' : 'C & D'}, "A &amp; B &amp; C &amp; D"),
-            'cycle22': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{{ x }}{% endfor %}", {'values': [1,2,3,4]}, "1234"),
-            'cycle23': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{{ abc }}{{ x }}{% endfor %}", {'values': [1,2,3,4]}, "a1b2c3a4"),
+            'cycle19': ("{% cycle 'a' 'b' as silent %}{% cycle silent %}", {}, 'ab'),
+            'cycle20': ('{% cycle one two as foo %} &amp; {% cycle foo %}', {'one' : 'A & B', 'two' : 'C & D'}, 'A & B &amp; C & D'),
+            'cycle21': ('{% filter force_escape %}{% cycle one two as foo %} & {% cycle foo %}{% endfilter %}', {'one' : 'A & B', 'two' : 'C & D'}, 'A &amp; B &amp; C &amp; D'),
+            'cycle22': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{{ x }}{% endfor %}", {'values': [1,2,3,4]}, '1234'),
+            'cycle23': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{{ abc }}{{ x }}{% endfor %}", {'values': [1,2,3,4]}, 'a1b2c3a4'),
             'included-cycle': ('{{ abc }}', {'abc': 'xxx'}, 'xxx'),
-            'cycle24': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{% include 'included-cycle' %}{% endfor %}", {'values': [1,2,3,4]}, "abca"),
+            'cycle24': ("{% for x in values %}{% cycle 'a' 'b' 'c' as abc silent %}{% include 'included-cycle' %}{% endfor %}", {'values': [1,2,3,4]}, 'abca'),
             'cycle25': ('{% cycle a as abc %}', {'a': '<'}, '<'),
 
             'cycle26': ('{% load cycle from future %}{% cycle a b as ab %}{% cycle ab %}', {'a': '<', 'b': '>'}, '&lt;&gt;'),
@@ -829,7 +829,7 @@ class Templates(TestCase):
             'exception01': ("{% extends 'nonexistent' %}", {}, (template.TemplateDoesNotExist, template.TemplateDoesNotExist)),
 
             # Raise exception for invalid template name (in variable)
-            'exception02': ("{% extends nonexistent %}", {}, (template.TemplateSyntaxError, template.TemplateDoesNotExist)),
+            'exception02': ('{% extends nonexistent %}', {}, (template.TemplateSyntaxError, template.TemplateDoesNotExist)),
 
             # Raise exception for extra {% extends %} tags
             'exception03': ("{% extends 'inheritance01' %}{% block first %}2{% endblock %}{% extends 'inheritance16' %}", {}, template.TemplateSyntaxError),
@@ -850,8 +850,8 @@ class Templates(TestCase):
             'firstof04': ('{% firstof a b c %}', {'a':0,'b':0,'c':3}, '3'),
             'firstof05': ('{% firstof a b c %}', {'a':1,'b':2,'c':3}, '1'),
             'firstof06': ('{% firstof a b c %}', {'b':0,'c':3}, '3'),
-            'firstof07': ('{% firstof a b "c" %}', {'a':0}, 'c'),
-            'firstof08': ('{% firstof a b "c and d" %}', {'a':0,'b':0}, 'c and d'),
+            'firstof07': ("{% firstof a b 'c' %}", {'a':0}, 'c'),
+            'firstof08': ("{% firstof a b 'c and d' %}", {'a':0,'b':0}, 'c and d'),
             'firstof09': ('{% firstof %}', {}, template.TemplateSyntaxError),
             'firstof10': ('{% firstof a %}', {'a': '<'}, '<'),
 
@@ -861,166 +861,166 @@ class Templates(TestCase):
             'firstof14': ('{% load firstof from future %}{% firstof a|safe b %}', {'a': '<'}, '<'),
 
             ### FOR TAG ###############################################################
-            'for-tag01': ("{% for val in values %}{{ val }}{% endfor %}", {"values": [1, 2, 3]}, "123"),
-            'for-tag02': ("{% for val in values reversed %}{{ val }}{% endfor %}", {"values": [1, 2, 3]}, "321"),
-            'for-tag-vars01': ("{% for val in values %}{{ forloop.counter }}{% endfor %}", {"values": [6, 6, 6]}, "123"),
-            'for-tag-vars02': ("{% for val in values %}{{ forloop.counter0 }}{% endfor %}", {"values": [6, 6, 6]}, "012"),
-            'for-tag-vars03': ("{% for val in values %}{{ forloop.revcounter }}{% endfor %}", {"values": [6, 6, 6]}, "321"),
-            'for-tag-vars04': ("{% for val in values %}{{ forloop.revcounter0 }}{% endfor %}", {"values": [6, 6, 6]}, "210"),
-            'for-tag-vars05': ("{% for val in values %}{% if forloop.first %}f{% else %}x{% endif %}{% endfor %}", {"values": [6, 6, 6]}, "fxx"),
-            'for-tag-vars06': ("{% for val in values %}{% if forloop.last %}l{% else %}x{% endif %}{% endfor %}", {"values": [6, 6, 6]}, "xxl"),
-            'for-tag-unpack01': ("{% for key,value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, "one:1/two:2/"),
-            'for-tag-unpack03': ("{% for key, value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, "one:1/two:2/"),
-            'for-tag-unpack04': ("{% for key , value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, "one:1/two:2/"),
-            'for-tag-unpack05': ("{% for key ,value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, "one:1/two:2/"),
-            'for-tag-unpack06': ("{% for key value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
-            'for-tag-unpack07': ("{% for key,,value in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
-            'for-tag-unpack08': ("{% for key,value, in items %}{{ key }}:{{ value }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
+            'for-tag01': ('{% for val in values %}{{ val }}{% endfor %}', {'values': [1, 2, 3]}, '123'),
+            'for-tag02': ('{% for val in values reversed %}{{ val }}{% endfor %}', {'values': [1, 2, 3]}, '321'),
+            'for-tag-vars01': ('{% for val in values %}{{ forloop.counter }}{% endfor %}', {'values': [6, 6, 6]}, '123'),
+            'for-tag-vars02': ('{% for val in values %}{{ forloop.counter0 }}{% endfor %}', {'values': [6, 6, 6]}, '012'),
+            'for-tag-vars03': ('{% for val in values %}{{ forloop.revcounter }}{% endfor %}', {'values': [6, 6, 6]}, '321'),
+            'for-tag-vars04': ('{% for val in values %}{{ forloop.revcounter0 }}{% endfor %}', {'values': [6, 6, 6]}, '210'),
+            'for-tag-vars05': ('{% for val in values %}{% if forloop.first %}f{% else %}x{% endif %}{% endfor %}', {'values': [6, 6, 6]}, 'fxx'),
+            'for-tag-vars06': ('{% for val in values %}{% if forloop.last %}l{% else %}x{% endif %}{% endfor %}', {'values': [6, 6, 6]}, 'xxl'),
+            'for-tag-unpack01': ('{% for key,value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, 'one:1/two:2/'),
+            'for-tag-unpack03': ('{% for key, value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, 'one:1/two:2/'),
+            'for-tag-unpack04': ('{% for key , value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, 'one:1/two:2/'),
+            'for-tag-unpack05': ('{% for key ,value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, 'one:1/two:2/'),
+            'for-tag-unpack06': ('{% for key value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
+            'for-tag-unpack07': ('{% for key,,value in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
+            'for-tag-unpack08': ('{% for key,value, in items %}{{ key }}:{{ value }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, template.TemplateSyntaxError),
             # Ensure that a single loopvar doesn't truncate the list in val.
-            'for-tag-unpack09': ("{% for val in items %}{{ val.0 }}:{{ val.1 }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, "one:1/two:2/"),
+            'for-tag-unpack09': ('{% for val in items %}{{ val.0 }}:{{ val.1 }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, 'one:1/two:2/'),
             # Otherwise, silently truncate if the length of loopvars differs to the length of each set of items.
-            'for-tag-unpack10': ("{% for x,y in items %}{{ x }}:{{ y }}/{% endfor %}", {"items": (('one', 1, 'carrot'), ('two', 2, 'orange'))}, "one:1/two:2/"),
-            'for-tag-unpack11': ("{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}", {"items": (('one', 1), ('two', 2))}, ("one:1,/two:2,/", "one:1,INVALID/two:2,INVALID/")),
-            'for-tag-unpack12': ("{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}", {"items": (('one', 1, 'carrot'), ('two', 2))}, ("one:1,carrot/two:2,/", "one:1,carrot/two:2,INVALID/")),
-            'for-tag-unpack13': ("{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}", {"items": (('one', 1, 'carrot'), ('two', 2, 'cheese'))}, ("one:1,carrot/two:2,cheese/", "one:1,carrot/two:2,cheese/")),
-            'for-tag-unpack14': ("{% for x,y in items %}{{ x }}:{{ y }}/{% endfor %}", {"items": (1, 2)}, (":/:/", "INVALID:INVALID/INVALID:INVALID/")),
-            'for-tag-empty01': ("{% for val in values %}{{ val }}{% empty %}empty text{% endfor %}", {"values": [1, 2, 3]}, "123"),
-            'for-tag-empty02': ("{% for val in values %}{{ val }}{% empty %}values array empty{% endfor %}", {"values": []}, "values array empty"),
-            'for-tag-empty03': ("{% for val in values %}{{ val }}{% empty %}values array not found{% endfor %}", {}, "values array not found"),
+            'for-tag-unpack10': ('{% for x,y in items %}{{ x }}:{{ y }}/{% endfor %}', {'items': (('one', 1, 'carrot'), ('two', 2, 'orange'))}, 'one:1/two:2/'),
+            'for-tag-unpack11': ('{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}', {'items': (('one', 1), ('two', 2))}, ('one:1,/two:2,/', 'one:1,INVALID/two:2,INVALID/')),
+            'for-tag-unpack12': ('{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}', {'items': (('one', 1, 'carrot'), ('two', 2))}, ('one:1,carrot/two:2,/', 'one:1,carrot/two:2,INVALID/')),
+            'for-tag-unpack13': ('{% for x,y,z in items %}{{ x }}:{{ y }},{{ z }}/{% endfor %}', {'items': (('one', 1, 'carrot'), ('two', 2, 'cheese'))}, ('one:1,carrot/two:2,cheese/', 'one:1,carrot/two:2,cheese/')),
+            'for-tag-unpack14': ('{% for x,y in items %}{{ x }}:{{ y }}/{% endfor %}', {'items': (1, 2)}, (':/:/', 'INVALID:INVALID/INVALID:INVALID/')),
+            'for-tag-empty01': ('{% for val in values %}{{ val }}{% empty %}empty text{% endfor %}', {'values': [1, 2, 3]}, '123'),
+            'for-tag-empty02': ('{% for val in values %}{{ val }}{% empty %}values array empty{% endfor %}', {'values': []}, 'values array empty'),
+            'for-tag-empty03': ('{% for val in values %}{{ val }}{% empty %}values array not found{% endfor %}', {}, 'values array not found'),
             # Ticket 19882
             'for-tag-filter-ws': ("{% load custom %}{% for x in s|noop:'x y' %}{{ x }}{% endfor %}", {'s': 'abc'}, 'abc'),
 
             ### IF TAG ################################################################
-            'if-tag01': ("{% if foo %}yes{% else %}no{% endif %}", {"foo": True}, "yes"),
-            'if-tag02': ("{% if foo %}yes{% else %}no{% endif %}", {"foo": False}, "no"),
-            'if-tag03': ("{% if foo %}yes{% else %}no{% endif %}", {}, "no"),
+            'if-tag01': ('{% if foo %}yes{% else %}no{% endif %}', {'foo': True}, 'yes'),
+            'if-tag02': ('{% if foo %}yes{% else %}no{% endif %}', {'foo': False}, 'no'),
+            'if-tag03': ('{% if foo %}yes{% else %}no{% endif %}', {}, 'no'),
 
-            'if-tag04': ("{% if foo %}foo{% elif bar %}bar{% endif %}", {'foo': True}, "foo"),
-            'if-tag05': ("{% if foo %}foo{% elif bar %}bar{% endif %}", {'bar': True}, "bar"),
-            'if-tag06': ("{% if foo %}foo{% elif bar %}bar{% endif %}", {}, ""),
-            'if-tag07': ("{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}", {'foo': True}, "foo"),
-            'if-tag08': ("{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}", {'bar': True}, "bar"),
-            'if-tag09': ("{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}", {}, "nothing"),
-            'if-tag10': ("{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}", {'foo': True}, "foo"),
-            'if-tag11': ("{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}", {'bar': True}, "bar"),
-            'if-tag12': ("{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}", {'baz': True}, "baz"),
-            'if-tag13': ("{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}", {}, "nothing"),
+            'if-tag04': ('{% if foo %}foo{% elif bar %}bar{% endif %}', {'foo': True}, 'foo'),
+            'if-tag05': ('{% if foo %}foo{% elif bar %}bar{% endif %}', {'bar': True}, 'bar'),
+            'if-tag06': ('{% if foo %}foo{% elif bar %}bar{% endif %}', {}, ''),
+            'if-tag07': ('{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}', {'foo': True}, 'foo'),
+            'if-tag08': ('{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}', {'bar': True}, 'bar'),
+            'if-tag09': ('{% if foo %}foo{% elif bar %}bar{% else %}nothing{% endif %}', {}, 'nothing'),
+            'if-tag10': ('{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}', {'foo': True}, 'foo'),
+            'if-tag11': ('{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}', {'bar': True}, 'bar'),
+            'if-tag12': ('{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}', {'baz': True}, 'baz'),
+            'if-tag13': ('{% if foo %}foo{% elif bar %}bar{% elif baz %}baz{% else %}nothing{% endif %}', {}, 'nothing'),
 
             # Filters
-            'if-tag-filter01': ("{% if foo|length == 5 %}yes{% else %}no{% endif %}", {'foo': 'abcde'}, "yes"),
-            'if-tag-filter02': ("{% if foo|upper == 'ABC' %}yes{% else %}no{% endif %}", {}, "no"),
+            'if-tag-filter01': ('{% if foo|length == 5 %}yes{% else %}no{% endif %}', {'foo': 'abcde'}, 'yes'),
+            'if-tag-filter02': ("{% if foo|upper == 'ABC' %}yes{% else %}no{% endif %}", {}, 'no'),
 
             # Equality
-            'if-tag-eq01': ("{% if foo == bar %}yes{% else %}no{% endif %}", {}, "yes"),
-            'if-tag-eq02': ("{% if foo == bar %}yes{% else %}no{% endif %}", {'foo': 1}, "no"),
-            'if-tag-eq03': ("{% if foo == bar %}yes{% else %}no{% endif %}", {'foo': 1, 'bar': 1}, "yes"),
-            'if-tag-eq04': ("{% if foo == bar %}yes{% else %}no{% endif %}", {'foo': 1, 'bar': 2}, "no"),
-            'if-tag-eq05': ("{% if foo == '' %}yes{% else %}no{% endif %}", {}, "no"),
+            'if-tag-eq01': ('{% if foo == bar %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-eq02': ('{% if foo == bar %}yes{% else %}no{% endif %}', {'foo': 1}, 'no'),
+            'if-tag-eq03': ('{% if foo == bar %}yes{% else %}no{% endif %}', {'foo': 1, 'bar': 1}, 'yes'),
+            'if-tag-eq04': ('{% if foo == bar %}yes{% else %}no{% endif %}', {'foo': 1, 'bar': 2}, 'no'),
+            'if-tag-eq05': ("{% if foo == '' %}yes{% else %}no{% endif %}", {}, 'no'),
 
             # Comparison
-            'if-tag-gt-01': ("{% if 2 > 1 %}yes{% else %}no{% endif %}", {}, "yes"),
-            'if-tag-gt-02': ("{% if 1 > 1 %}yes{% else %}no{% endif %}", {}, "no"),
-            'if-tag-gte-01': ("{% if 1 >= 1 %}yes{% else %}no{% endif %}", {}, "yes"),
-            'if-tag-gte-02': ("{% if 1 >= 2 %}yes{% else %}no{% endif %}", {}, "no"),
-            'if-tag-lt-01': ("{% if 1 < 2 %}yes{% else %}no{% endif %}", {}, "yes"),
-            'if-tag-lt-02': ("{% if 1 < 1 %}yes{% else %}no{% endif %}", {}, "no"),
-            'if-tag-lte-01': ("{% if 1 <= 1 %}yes{% else %}no{% endif %}", {}, "yes"),
-            'if-tag-lte-02': ("{% if 2 <= 1 %}yes{% else %}no{% endif %}", {}, "no"),
+            'if-tag-gt-01': ('{% if 2 > 1 %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-gt-02': ('{% if 1 > 1 %}yes{% else %}no{% endif %}', {}, 'no'),
+            'if-tag-gte-01': ('{% if 1 >= 1 %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-gte-02': ('{% if 1 >= 2 %}yes{% else %}no{% endif %}', {}, 'no'),
+            'if-tag-lt-01': ('{% if 1 < 2 %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-lt-02': ('{% if 1 < 1 %}yes{% else %}no{% endif %}', {}, 'no'),
+            'if-tag-lte-01': ('{% if 1 <= 1 %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-lte-02': ('{% if 2 <= 1 %}yes{% else %}no{% endif %}', {}, 'no'),
 
             # Contains
-            'if-tag-in-01': ("{% if 1 in x %}yes{% else %}no{% endif %}", {'x':[1]}, "yes"),
-            'if-tag-in-02': ("{% if 2 in x %}yes{% else %}no{% endif %}", {'x':[1]}, "no"),
-            'if-tag-not-in-01': ("{% if 1 not in x %}yes{% else %}no{% endif %}", {'x':[1]}, "no"),
-            'if-tag-not-in-02': ("{% if 2 not in x %}yes{% else %}no{% endif %}", {'x':[1]}, "yes"),
+            'if-tag-in-01': ('{% if 1 in x %}yes{% else %}no{% endif %}', {'x':[1]}, 'yes'),
+            'if-tag-in-02': ('{% if 2 in x %}yes{% else %}no{% endif %}', {'x':[1]}, 'no'),
+            'if-tag-not-in-01': ('{% if 1 not in x %}yes{% else %}no{% endif %}', {'x':[1]}, 'no'),
+            'if-tag-not-in-02': ('{% if 2 not in x %}yes{% else %}no{% endif %}', {'x':[1]}, 'yes'),
 
             # AND
-            'if-tag-and01': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'yes'),
-            'if-tag-and02': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'no'),
-            'if-tag-and03': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'no'),
-            'if-tag-and04': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'no'),
-            'if-tag-and05': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': False}, 'no'),
-            'if-tag-and06': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'bar': False}, 'no'),
-            'if-tag-and07': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'foo': True}, 'no'),
-            'if-tag-and08': ("{% if foo and bar %}yes{% else %}no{% endif %}", {'bar': True}, 'no'),
+            'if-tag-and01': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'yes'),
+            'if-tag-and02': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'no'),
+            'if-tag-and03': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'no'),
+            'if-tag-and04': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'no'),
+            'if-tag-and05': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': False}, 'no'),
+            'if-tag-and06': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'bar': False}, 'no'),
+            'if-tag-and07': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'foo': True}, 'no'),
+            'if-tag-and08': ('{% if foo and bar %}yes{% else %}no{% endif %}', {'bar': True}, 'no'),
 
             # OR
-            'if-tag-or01': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'yes'),
-            'if-tag-or02': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'yes'),
-            'if-tag-or03': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'yes'),
-            'if-tag-or04': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'no'),
-            'if-tag-or05': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': False}, 'no'),
-            'if-tag-or06': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'bar': False}, 'no'),
-            'if-tag-or07': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'foo': True}, 'yes'),
-            'if-tag-or08': ("{% if foo or bar %}yes{% else %}no{% endif %}", {'bar': True}, 'yes'),
+            'if-tag-or01': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'yes'),
+            'if-tag-or02': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'yes'),
+            'if-tag-or03': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'yes'),
+            'if-tag-or04': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'no'),
+            'if-tag-or05': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': False}, 'no'),
+            'if-tag-or06': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'bar': False}, 'no'),
+            'if-tag-or07': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'foo': True}, 'yes'),
+            'if-tag-or08': ('{% if foo or bar %}yes{% else %}no{% endif %}', {'bar': True}, 'yes'),
 
             # multiple ORs
-            'if-tag-or09': ("{% if foo or bar or baz %}yes{% else %}no{% endif %}", {'baz': True}, 'yes'),
+            'if-tag-or09': ('{% if foo or bar or baz %}yes{% else %}no{% endif %}', {'baz': True}, 'yes'),
 
             # NOT
-            'if-tag-not01': ("{% if not foo %}no{% else %}yes{% endif %}", {'foo': True}, 'yes'),
-            'if-tag-not02': ("{% if not not foo %}no{% else %}yes{% endif %}", {'foo': True}, 'no'),
+            'if-tag-not01': ('{% if not foo %}no{% else %}yes{% endif %}', {'foo': True}, 'yes'),
+            'if-tag-not02': ('{% if not not foo %}no{% else %}yes{% endif %}', {'foo': True}, 'no'),
             # not03 to not05 removed, now TemplateSyntaxErrors
 
-            'if-tag-not06': ("{% if foo and not bar %}yes{% else %}no{% endif %}", {}, 'no'),
-            'if-tag-not07': ("{% if foo and not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'no'),
-            'if-tag-not08': ("{% if foo and not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'yes'),
-            'if-tag-not09': ("{% if foo and not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'no'),
-            'if-tag-not10': ("{% if foo and not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'no'),
+            'if-tag-not06': ('{% if foo and not bar %}yes{% else %}no{% endif %}', {}, 'no'),
+            'if-tag-not07': ('{% if foo and not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'no'),
+            'if-tag-not08': ('{% if foo and not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'yes'),
+            'if-tag-not09': ('{% if foo and not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'no'),
+            'if-tag-not10': ('{% if foo and not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'no'),
 
-            'if-tag-not11': ("{% if not foo and bar %}yes{% else %}no{% endif %}", {}, 'no'),
-            'if-tag-not12': ("{% if not foo and bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'no'),
-            'if-tag-not13': ("{% if not foo and bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'no'),
-            'if-tag-not14': ("{% if not foo and bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'yes'),
-            'if-tag-not15': ("{% if not foo and bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'no'),
+            'if-tag-not11': ('{% if not foo and bar %}yes{% else %}no{% endif %}', {}, 'no'),
+            'if-tag-not12': ('{% if not foo and bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'no'),
+            'if-tag-not13': ('{% if not foo and bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'no'),
+            'if-tag-not14': ('{% if not foo and bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'yes'),
+            'if-tag-not15': ('{% if not foo and bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'no'),
 
-            'if-tag-not16': ("{% if foo or not bar %}yes{% else %}no{% endif %}", {}, 'yes'),
-            'if-tag-not17': ("{% if foo or not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'yes'),
-            'if-tag-not18': ("{% if foo or not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'yes'),
-            'if-tag-not19': ("{% if foo or not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'no'),
-            'if-tag-not20': ("{% if foo or not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'yes'),
+            'if-tag-not16': ('{% if foo or not bar %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-not17': ('{% if foo or not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'yes'),
+            'if-tag-not18': ('{% if foo or not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'yes'),
+            'if-tag-not19': ('{% if foo or not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'no'),
+            'if-tag-not20': ('{% if foo or not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'yes'),
 
-            'if-tag-not21': ("{% if not foo or bar %}yes{% else %}no{% endif %}", {}, 'yes'),
-            'if-tag-not22': ("{% if not foo or bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'yes'),
-            'if-tag-not23': ("{% if not foo or bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'no'),
-            'if-tag-not24': ("{% if not foo or bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'yes'),
-            'if-tag-not25': ("{% if not foo or bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'yes'),
+            'if-tag-not21': ('{% if not foo or bar %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-not22': ('{% if not foo or bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'yes'),
+            'if-tag-not23': ('{% if not foo or bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'no'),
+            'if-tag-not24': ('{% if not foo or bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'yes'),
+            'if-tag-not25': ('{% if not foo or bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'yes'),
 
-            'if-tag-not26': ("{% if not foo and not bar %}yes{% else %}no{% endif %}", {}, 'yes'),
-            'if-tag-not27': ("{% if not foo and not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'no'),
-            'if-tag-not28': ("{% if not foo and not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'no'),
-            'if-tag-not29': ("{% if not foo and not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'no'),
-            'if-tag-not30': ("{% if not foo and not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'yes'),
+            'if-tag-not26': ('{% if not foo and not bar %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-not27': ('{% if not foo and not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'no'),
+            'if-tag-not28': ('{% if not foo and not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'no'),
+            'if-tag-not29': ('{% if not foo and not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'no'),
+            'if-tag-not30': ('{% if not foo and not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'yes'),
 
-            'if-tag-not31': ("{% if not foo or not bar %}yes{% else %}no{% endif %}", {}, 'yes'),
-            'if-tag-not32': ("{% if not foo or not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': True}, 'no'),
-            'if-tag-not33': ("{% if not foo or not bar %}yes{% else %}no{% endif %}", {'foo': True, 'bar': False}, 'yes'),
-            'if-tag-not34': ("{% if not foo or not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': True}, 'yes'),
-            'if-tag-not35': ("{% if not foo or not bar %}yes{% else %}no{% endif %}", {'foo': False, 'bar': False}, 'yes'),
+            'if-tag-not31': ('{% if not foo or not bar %}yes{% else %}no{% endif %}', {}, 'yes'),
+            'if-tag-not32': ('{% if not foo or not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': True}, 'no'),
+            'if-tag-not33': ('{% if not foo or not bar %}yes{% else %}no{% endif %}', {'foo': True, 'bar': False}, 'yes'),
+            'if-tag-not34': ('{% if not foo or not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': True}, 'yes'),
+            'if-tag-not35': ('{% if not foo or not bar %}yes{% else %}no{% endif %}', {'foo': False, 'bar': False}, 'yes'),
 
             # Various syntax errors
-            'if-tag-error01': ("{% if %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error02': ("{% if foo and %}yes{% else %}no{% endif %}", {'foo': True}, template.TemplateSyntaxError),
-            'if-tag-error03': ("{% if foo or %}yes{% else %}no{% endif %}", {'foo': True}, template.TemplateSyntaxError),
-            'if-tag-error04': ("{% if not foo and %}yes{% else %}no{% endif %}", {'foo': True}, template.TemplateSyntaxError),
-            'if-tag-error05': ("{% if not foo or %}yes{% else %}no{% endif %}", {'foo': True}, template.TemplateSyntaxError),
-            'if-tag-error06': ("{% if abc def %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error07': ("{% if not %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error08': ("{% if and %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error09': ("{% if or %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error10': ("{% if == %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error11': ("{% if 1 == %}yes{% endif %}", {}, template.TemplateSyntaxError),
-            'if-tag-error12': ("{% if a not b %}yes{% endif %}", {}, template.TemplateSyntaxError),
+            'if-tag-error01': ('{% if %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error02': ('{% if foo and %}yes{% else %}no{% endif %}', {'foo': True}, template.TemplateSyntaxError),
+            'if-tag-error03': ('{% if foo or %}yes{% else %}no{% endif %}', {'foo': True}, template.TemplateSyntaxError),
+            'if-tag-error04': ('{% if not foo and %}yes{% else %}no{% endif %}', {'foo': True}, template.TemplateSyntaxError),
+            'if-tag-error05': ('{% if not foo or %}yes{% else %}no{% endif %}', {'foo': True}, template.TemplateSyntaxError),
+            'if-tag-error06': ('{% if abc def %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error07': ('{% if not %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error08': ('{% if and %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error09': ('{% if or %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error10': ('{% if == %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error11': ('{% if 1 == %}yes{% endif %}', {}, template.TemplateSyntaxError),
+            'if-tag-error12': ('{% if a not b %}yes{% endif %}', {}, template.TemplateSyntaxError),
 
             # If evaluations are shortcircuited where possible
             # If is_bad is invoked, it will raise a ShouldNotExecuteException
-            'if-tag-shortcircuit01': ('{% if x.is_true or x.is_bad %}yes{% else %}no{% endif %}', {'x': TestObj()}, "yes"),
-            'if-tag-shortcircuit02': ('{% if x.is_false and x.is_bad %}yes{% else %}no{% endif %}', {'x': TestObj()}, "no"),
+            'if-tag-shortcircuit01': ('{% if x.is_true or x.is_bad %}yes{% else %}no{% endif %}', {'x': TestObj()}, 'yes'),
+            'if-tag-shortcircuit02': ('{% if x.is_false and x.is_bad %}yes{% else %}no{% endif %}', {'x': TestObj()}, 'no'),
 
             # Non-existent args
-            'if-tag-badarg01':("{% if x|default_if_none:y %}yes{% endif %}", {}, ''),
-            'if-tag-badarg02':("{% if x|default_if_none:y %}yes{% endif %}", {'y': 0}, ''),
-            'if-tag-badarg03':("{% if x|default_if_none:y %}yes{% endif %}", {'y': 1}, 'yes'),
-            'if-tag-badarg04':("{% if x|default_if_none:y %}yes{% else %}no{% endif %}", {}, 'no'),
+            'if-tag-badarg01':('{% if x|default_if_none:y %}yes{% endif %}', {}, ''),
+            'if-tag-badarg02':('{% if x|default_if_none:y %}yes{% endif %}', {'y': 0}, ''),
+            'if-tag-badarg03':('{% if x|default_if_none:y %}yes{% endif %}', {'y': 1}, 'yes'),
+            'if-tag-badarg04':('{% if x|default_if_none:y %}yes{% else %}no{% endif %}', {}, 'no'),
 
             # Additional, more precise parsing tests are in SmartIfTests
 
@@ -1061,28 +1061,28 @@ class Templates(TestCase):
             'ifchanged-filter-ws': ('{% load custom %}{% for n in num %}{% ifchanged n|noop:"x y" %}..{% endifchanged %}{{ n }}{% endfor %}', {'num': (1,2,3)}, '..1..2..3'),
 
             ### IFEQUAL TAG ###########################################################
-            'ifequal01': ("{% ifequal a b %}yes{% endifequal %}", {"a": 1, "b": 2}, ""),
-            'ifequal02': ("{% ifequal a b %}yes{% endifequal %}", {"a": 1, "b": 1}, "yes"),
-            'ifequal03': ("{% ifequal a b %}yes{% else %}no{% endifequal %}", {"a": 1, "b": 2}, "no"),
-            'ifequal04': ("{% ifequal a b %}yes{% else %}no{% endifequal %}", {"a": 1, "b": 1}, "yes"),
-            'ifequal05': ("{% ifequal a 'test' %}yes{% else %}no{% endifequal %}", {"a": "test"}, "yes"),
-            'ifequal06': ("{% ifequal a 'test' %}yes{% else %}no{% endifequal %}", {"a": "no"}, "no"),
-            'ifequal07': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {"a": "test"}, "yes"),
-            'ifequal08': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {"a": "no"}, "no"),
-            'ifequal09': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {}, "no"),
-            'ifequal10': ('{% ifequal a b %}yes{% else %}no{% endifequal %}', {}, "yes"),
+            'ifequal01': ('{% ifequal a b %}yes{% endifequal %}', {'a': 1, 'b': 2}, ''),
+            'ifequal02': ('{% ifequal a b %}yes{% endifequal %}', {'a': 1, 'b': 1}, 'yes'),
+            'ifequal03': ('{% ifequal a b %}yes{% else %}no{% endifequal %}', {'a': 1, 'b': 2}, 'no'),
+            'ifequal04': ('{% ifequal a b %}yes{% else %}no{% endifequal %}', {'a': 1, 'b': 1}, 'yes'),
+            'ifequal05': ("{% ifequal a 'test' %}yes{% else %}no{% endifequal %}", {'a': 'test'}, 'yes'),
+            'ifequal06': ("{% ifequal a 'test' %}yes{% else %}no{% endifequal %}", {'a': 'no'}, 'no'),
+            'ifequal07': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {'a': 'test'}, 'yes'),
+            'ifequal08': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {'a': 'no'}, 'no'),
+            'ifequal09': ('{% ifequal a "test" %}yes{% else %}no{% endifequal %}', {}, 'no'),
+            'ifequal10': ('{% ifequal a b %}yes{% else %}no{% endifequal %}', {}, 'yes'),
 
             # SMART SPLITTING
-            'ifequal-split01': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {}, "no"),
-            'ifequal-split02': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {'a': 'foo'}, "no"),
-            'ifequal-split03': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {'a': 'test man'}, "yes"),
-            'ifequal-split04': ("{% ifequal a 'test man' %}yes{% else %}no{% endifequal %}", {'a': 'test man'}, "yes"),
-            'ifequal-split05': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': ''}, "no"),
-            'ifequal-split06': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': 'i "love" you'}, "yes"),
-            'ifequal-split07': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': 'i love you'}, "no"),
-            'ifequal-split08': (r"{% ifequal a 'I\'m happy' %}yes{% else %}no{% endifequal %}", {'a': "I'm happy"}, "yes"),
-            'ifequal-split09': (r"{% ifequal a 'slash\man' %}yes{% else %}no{% endifequal %}", {'a': r"slash\man"}, "yes"),
-            'ifequal-split10': (r"{% ifequal a 'slash\man' %}yes{% else %}no{% endifequal %}", {'a': r"slashman"}, "no"),
+            'ifequal-split01': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {}, 'no'),
+            'ifequal-split02': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {'a': 'foo'}, 'no'),
+            'ifequal-split03': ('{% ifequal a "test man" %}yes{% else %}no{% endifequal %}', {'a': 'test man'}, 'yes'),
+            'ifequal-split04': ("{% ifequal a 'test man' %}yes{% else %}no{% endifequal %}", {'a': 'test man'}, 'yes'),
+            'ifequal-split05': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': ''}, 'no'),
+            'ifequal-split06': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': 'i "love" you'}, 'yes'),
+            'ifequal-split07': ("{% ifequal a 'i \"love\" you' %}yes{% else %}no{% endifequal %}", {'a': 'i love you'}, 'no'),
+            'ifequal-split08': (r"{% ifequal a 'I\'m happy' %}yes{% else %}no{% endifequal %}", {'a': "I'm happy"}, 'yes'),
+            'ifequal-split09': (r"{% ifequal a 'slash\man' %}yes{% else %}no{% endifequal %}", {'a': r'slash\man'}, 'yes'),
+            'ifequal-split10': (r"{% ifequal a 'slash\man' %}yes{% else %}no{% endifequal %}", {'a': r'slashman'}, 'no'),
 
             # NUMERIC RESOLUTION
             'ifequal-numeric01': ('{% ifequal x 5 %}yes{% endifequal %}', {'x': '5'}, ''),
@@ -1106,16 +1106,16 @@ class Templates(TestCase):
             'ifequal-filter05': ('{% ifequal x|slice:"1"|upper "A" %}x{% endifequal %}', {'x': 'aaa'}, 'x'),
 
             ### IFNOTEQUAL TAG ########################################################
-            'ifnotequal01': ("{% ifnotequal a b %}yes{% endifnotequal %}", {"a": 1, "b": 2}, "yes"),
-            'ifnotequal02': ("{% ifnotequal a b %}yes{% endifnotequal %}", {"a": 1, "b": 1}, ""),
-            'ifnotequal03': ("{% ifnotequal a b %}yes{% else %}no{% endifnotequal %}", {"a": 1, "b": 2}, "yes"),
-            'ifnotequal04': ("{% ifnotequal a b %}yes{% else %}no{% endifnotequal %}", {"a": 1, "b": 1}, "no"),
+            'ifnotequal01': ('{% ifnotequal a b %}yes{% endifnotequal %}', {'a': 1, 'b': 2}, 'yes'),
+            'ifnotequal02': ('{% ifnotequal a b %}yes{% endifnotequal %}', {'a': 1, 'b': 1}, ''),
+            'ifnotequal03': ('{% ifnotequal a b %}yes{% else %}no{% endifnotequal %}', {'a': 1, 'b': 2}, 'yes'),
+            'ifnotequal04': ('{% ifnotequal a b %}yes{% else %}no{% endifnotequal %}', {'a': 1, 'b': 1}, 'no'),
 
             ## INCLUDE TAG ###########################################################
-            'include01': ('{% include "basic-syntax01" %}', {}, "something cool"),
-            'include02': ('{% include "basic-syntax02" %}', {'headline': 'Included'}, "Included"),
-            'include03': ('{% include template_name %}', {'template_name': 'basic-syntax02', 'headline': 'Included'}, "Included"),
-            'include04': ('a{% include "nonexistent" %}b', {}, ("ab", "ab", template.TemplateDoesNotExist)),
+            'include01': ('{% include "basic-syntax01" %}', {}, 'something cool'),
+            'include02': ('{% include "basic-syntax02" %}', {'headline': 'Included'}, 'Included'),
+            'include03': ('{% include template_name %}', {'template_name': 'basic-syntax02', 'headline': 'Included'}, 'Included'),
+            'include04': ('a{% include "nonexistent" %}b', {}, ('ab', 'ab', template.TemplateDoesNotExist)),
             'include 05': ('template with a space', {}, 'template with a space'),
             'include06': ('{% include "include 05"%}', {}, 'template with a space'),
 
@@ -1152,22 +1152,22 @@ class Templates(TestCase):
             ### NAMED ENDBLOCKS #######################################################
 
             # Basic test
-            'namedendblocks01': ("1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3", {}, '1_2_3'),
+            'namedendblocks01': ('1{% block first %}_{% block second %}2{% endblock second %}_{% endblock first %}3', {}, '1_2_3'),
 
             # Unbalanced blocks
-            'namedendblocks02': ("1{% block first %}_{% block second %}2{% endblock first %}_{% endblock second %}3", {}, template.TemplateSyntaxError),
-            'namedendblocks03': ("1{% block first %}_{% block second %}2{% endblock %}_{% endblock second %}3", {}, template.TemplateSyntaxError),
-            'namedendblocks04': ("1{% block first %}_{% block second %}2{% endblock second %}_{% endblock third %}3", {}, template.TemplateSyntaxError),
-            'namedendblocks05': ("1{% block first %}_{% block second %}2{% endblock first %}", {}, template.TemplateSyntaxError),
+            'namedendblocks02': ('1{% block first %}_{% block second %}2{% endblock first %}_{% endblock second %}3', {}, template.TemplateSyntaxError),
+            'namedendblocks03': ('1{% block first %}_{% block second %}2{% endblock %}_{% endblock second %}3', {}, template.TemplateSyntaxError),
+            'namedendblocks04': ('1{% block first %}_{% block second %}2{% endblock second %}_{% endblock third %}3', {}, template.TemplateSyntaxError),
+            'namedendblocks05': ('1{% block first %}_{% block second %}2{% endblock first %}', {}, template.TemplateSyntaxError),
 
             # Mixed named and unnamed endblocks
-            'namedendblocks06': ("1{% block first %}_{% block second %}2{% endblock %}_{% endblock first %}3", {}, '1_2_3'),
-            'namedendblocks07': ("1{% block first %}_{% block second %}2{% endblock second %}_{% endblock %}3", {}, '1_2_3'),
+            'namedendblocks06': ('1{% block first %}_{% block second %}2{% endblock %}_{% endblock first %}3', {}, '1_2_3'),
+            'namedendblocks07': ('1{% block first %}_{% block second %}2{% endblock second %}_{% endblock %}3', {}, '1_2_3'),
 
             ### INHERITANCE ###########################################################
 
             # Standard template with no inheritance
-            'inheritance01': ("1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}", {}, '1&3_'),
+            'inheritance01': ('1{% block first %}&{% endblock %}3{% block second %}_{% endblock %}', {}, '1&3_'),
 
             # Standard two-level inheritance
             'inheritance02': ("{% extends 'inheritance01' %}{% block first %}2{% endblock %}{% block second %}4{% endblock %}", {}, '1234'),
@@ -1182,7 +1182,7 @@ class Templates(TestCase):
             'inheritance05': ('{% extends "inheritance02" %}', {}, '1234'),
 
             # Three-level with variable parent-template name
-            'inheritance06': ("{% extends foo %}", {'foo': 'inheritance02'}, '1234'),
+            'inheritance06': ('{% extends foo %}', {'foo': 'inheritance02'}, '1234'),
 
             # Two-level with one block defined, one block not defined
             'inheritance07': ("{% extends 'inheritance01' %}{% block second %}5{% endblock %}", {}, '1&35'),
@@ -1215,10 +1215,10 @@ class Templates(TestCase):
             'inheritance16': ("{% extends 'inheritance15' %}{% block inner %}out{% endblock %}", {}, '12out3_'),
 
             # {% load %} tag (parent -- setup for exception04)
-            'inheritance17': ("{% load testtags %}{% block first %}1234{% endblock %}", {}, '1234'),
+            'inheritance17': ('{% load testtags %}{% block first %}1234{% endblock %}', {}, '1234'),
 
             # {% load %} tag (standard usage, without inheritance)
-            'inheritance18': ("{% load testtags %}{% echo this that theother %}5678", {}, 'this that theother5678'),
+            'inheritance18': ('{% load testtags %}{% echo this that theother %}5678', {}, 'this that theother5678'),
 
             # {% load %} tag (within a child template)
             'inheritance19': ("{% extends 'inheritance01' %}{% block first %}{% load testtags %}{% echo 400 %}5678{% endblock %}", {}, '140056783_'),
@@ -1236,39 +1236,39 @@ class Templates(TestCase):
             'inheritance23': ("{% extends 'inheritance20' %}{% block first %}{{ block.super }}b{% endblock %}", {}, '1&ab3_'),
 
             # Inheritance from local context without use of template loader
-            'inheritance24': ("{% extends context_template %}{% block first %}2{% endblock %}{% block second %}4{% endblock %}", {'context_template': template.Template("1{% block first %}_{% endblock %}3{% block second %}_{% endblock %}")}, '1234'),
+            'inheritance24': ('{% extends context_template %}{% block first %}2{% endblock %}{% block second %}4{% endblock %}', {'context_template': template.Template('1{% block first %}_{% endblock %}3{% block second %}_{% endblock %}')}, '1234'),
 
             # Inheritance from local context with variable parent template
-            'inheritance25': ("{% extends context_template.1 %}{% block first %}2{% endblock %}{% block second %}4{% endblock %}", {'context_template': [template.Template("Wrong"), template.Template("1{% block first %}_{% endblock %}3{% block second %}_{% endblock %}")]}, '1234'),
+            'inheritance25': ('{% extends context_template.1 %}{% block first %}2{% endblock %}{% block second %}4{% endblock %}', {'context_template': [template.Template('Wrong'), template.Template('1{% block first %}_{% endblock %}3{% block second %}_{% endblock %}')]}, '1234'),
 
             # Set up a base template to extend
-            'inheritance26': ("no tags", {}, 'no tags'),
+            'inheritance26': ('no tags', {}, 'no tags'),
 
             # Inheritance from a template that doesn't have any blocks
             'inheritance27': ("{% extends 'inheritance26' %}", {}, 'no tags'),
 
             # Set up a base template with a space in it.
-            'inheritance 28': ("{% block first %}!{% endblock %}", {}, '!'),
+            'inheritance 28': ('{% block first %}!{% endblock %}', {}, '!'),
 
             # Inheritance from a template with a space in its name should work.
             'inheritance29': ("{% extends 'inheritance 28' %}", {}, '!'),
 
             # Base template, putting block in a conditional {% if %} tag
-            'inheritance30': ("1{% if optional %}{% block opt %}2{% endblock %}{% endif %}3", {'optional': True}, '123'),
+            'inheritance30': ('1{% if optional %}{% block opt %}2{% endblock %}{% endif %}3', {'optional': True}, '123'),
 
             # Inherit from a template with block wrapped in an {% if %} tag (in parent), still gets overridden
             'inheritance31': ("{% extends 'inheritance30' %}{% block opt %}two{% endblock %}", {'optional': True}, '1two3'),
             'inheritance32': ("{% extends 'inheritance30' %}{% block opt %}two{% endblock %}", {}, '13'),
 
             # Base template, putting block in a conditional {% ifequal %} tag
-            'inheritance33': ("1{% ifequal optional 1 %}{% block opt %}2{% endblock %}{% endifequal %}3", {'optional': 1}, '123'),
+            'inheritance33': ('1{% ifequal optional 1 %}{% block opt %}2{% endblock %}{% endifequal %}3', {'optional': 1}, '123'),
 
             # Inherit from a template with block wrapped in an {% ifequal %} tag (in parent), still gets overridden
             'inheritance34': ("{% extends 'inheritance33' %}{% block opt %}two{% endblock %}", {'optional': 1}, '1two3'),
             'inheritance35': ("{% extends 'inheritance33' %}{% block opt %}two{% endblock %}", {'optional': 2}, '13'),
 
             # Base template, putting block in a {% for %} tag
-            'inheritance36': ("{% for n in numbers %}_{% block opt %}{{ n }}{% endblock %}{% endfor %}_", {'numbers': '123'}, '_1_2_3_'),
+            'inheritance36': ('{% for n in numbers %}_{% block opt %}{{ n }}{% endblock %}{% endfor %}_', {'numbers': '123'}, '_1_2_3_'),
 
             # Inherit from a template with block wrapped in an {% for %} tag (in parent), still gets overridden
             'inheritance37': ("{% extends 'inheritance36' %}{% block opt %}X{% endblock %}", {'numbers': '123'}, '_X_X_X_'),
@@ -1283,62 +1283,62 @@ class Templates(TestCase):
             'inheritance42': ("{% extends 'inheritance02'|cut:' ' %}", {}, '1234'),
 
             ### LOADING TAG LIBRARIES #################################################
-            'load01': ("{% load testtags subpackage.echo %}{% echo test %} {% echo2 \"test\" %}", {}, "test test"),
-            'load02': ("{% load subpackage.echo %}{% echo2 \"test\" %}", {}, "test"),
+            'load01': ("{% load testtags subpackage.echo %}{% echo test %} {% echo2 \"test\" %}", {}, 'test test'),
+            'load02': ("{% load subpackage.echo %}{% echo2 \"test\" %}", {}, 'test'),
 
             # {% load %} tag, importing individual tags
-            'load03': ("{% load echo from testtags %}{% echo this that theother %}", {}, 'this that theother'),
-            'load04': ("{% load echo other_echo from testtags %}{% echo this that theother %} {% other_echo and another thing %}", {}, 'this that theother and another thing'),
-            'load05': ("{% load echo upper from testtags %}{% echo this that theother %} {{ statement|upper }}", {'statement': 'not shouting'}, 'this that theother NOT SHOUTING'),
-            'load06': ("{% load echo2 from subpackage.echo %}{% echo2 \"test\" %}", {}, "test"),
+            'load03': ('{% load echo from testtags %}{% echo this that theother %}', {}, 'this that theother'),
+            'load04': ('{% load echo other_echo from testtags %}{% echo this that theother %} {% other_echo and another thing %}', {}, 'this that theother and another thing'),
+            'load05': ('{% load echo upper from testtags %}{% echo this that theother %} {{ statement|upper }}', {'statement': 'not shouting'}, 'this that theother NOT SHOUTING'),
+            'load06': ("{% load echo2 from subpackage.echo %}{% echo2 \"test\" %}", {}, 'test'),
 
             # {% load %} tag errors
-            'load07': ("{% load echo other_echo bad_tag from testtags %}", {}, template.TemplateSyntaxError),
-            'load08': ("{% load echo other_echo bad_tag from %}", {}, template.TemplateSyntaxError),
-            'load09': ("{% load from testtags %}", {}, template.TemplateSyntaxError),
-            'load10': ("{% load echo from bad_library %}", {}, template.TemplateSyntaxError),
-            'load11': ("{% load subpackage.echo_invalid %}", {}, template.TemplateSyntaxError),
-            'load12': ("{% load subpackage.missing %}", {}, template.TemplateSyntaxError),
+            'load07': ('{% load echo other_echo bad_tag from testtags %}', {}, template.TemplateSyntaxError),
+            'load08': ('{% load echo other_echo bad_tag from %}', {}, template.TemplateSyntaxError),
+            'load09': ('{% load from testtags %}', {}, template.TemplateSyntaxError),
+            'load10': ('{% load echo from bad_library %}', {}, template.TemplateSyntaxError),
+            'load11': ('{% load subpackage.echo_invalid %}', {}, template.TemplateSyntaxError),
+            'load12': ('{% load subpackage.missing %}', {}, template.TemplateSyntaxError),
 
             ### I18N ##################################################################
 
             # {% spaceless %} tag
-            'spaceless01': ("{% spaceless %} <b>    <i> text </i>    </b> {% endspaceless %}", {}, "<b><i> text </i></b>"),
-            'spaceless02': ("{% spaceless %} <b> \n <i> text </i> \n </b> {% endspaceless %}", {}, "<b><i> text </i></b>"),
-            'spaceless03': ("{% spaceless %}<b><i>text</i></b>{% endspaceless %}", {}, "<b><i>text</i></b>"),
-            'spaceless04': ("{% spaceless %}<b>   <i>{{ text }}</i>  </b>{% endspaceless %}", {'text' : 'This & that'}, "<b><i>This &amp; that</i></b>"),
-            'spaceless05': ("{% autoescape off %}{% spaceless %}<b>   <i>{{ text }}</i>  </b>{% endspaceless %}{% endautoescape %}", {'text' : 'This & that'}, "<b><i>This & that</i></b>"),
-            'spaceless06': ("{% spaceless %}<b>   <i>{{ text|safe }}</i>  </b>{% endspaceless %}", {'text' : 'This & that'}, "<b><i>This & that</i></b>"),
+            'spaceless01': ('{% spaceless %} <b>    <i> text </i>    </b> {% endspaceless %}', {}, '<b><i> text </i></b>'),
+            'spaceless02': ('{% spaceless %} <b> \n <i> text </i> \n </b> {% endspaceless %}', {}, '<b><i> text </i></b>'),
+            'spaceless03': ('{% spaceless %}<b><i>text</i></b>{% endspaceless %}', {}, '<b><i>text</i></b>'),
+            'spaceless04': ('{% spaceless %}<b>   <i>{{ text }}</i>  </b>{% endspaceless %}', {'text' : 'This & that'}, '<b><i>This &amp; that</i></b>'),
+            'spaceless05': ('{% autoescape off %}{% spaceless %}<b>   <i>{{ text }}</i>  </b>{% endspaceless %}{% endautoescape %}', {'text' : 'This & that'}, '<b><i>This & that</i></b>'),
+            'spaceless06': ('{% spaceless %}<b>   <i>{{ text|safe }}</i>  </b>{% endspaceless %}', {'text' : 'This & that'}, '<b><i>This & that</i></b>'),
 
             # simple translation of a string delimited by '
-            'i18n01': ("{% load i18n %}{% trans 'xxxyyyxxx' %}", {}, "xxxyyyxxx"),
+            'i18n01': ("{% load i18n %}{% trans 'xxxyyyxxx' %}", {}, 'xxxyyyxxx'),
 
             # simple translation of a string delimited by "
-            'i18n02': ('{% load i18n %}{% trans "xxxyyyxxx" %}', {}, "xxxyyyxxx"),
+            'i18n02': ('{% load i18n %}{% trans "xxxyyyxxx" %}', {}, 'xxxyyyxxx'),
 
             # simple translation of a variable
-            'i18n03': ('{% load i18n %}{% blocktrans %}{{ anton }}{% endblocktrans %}', {'anton': b'\xc3\x85'}, "Å"),
+            'i18n03': ('{% load i18n %}{% blocktrans %}{{ anton }}{% endblocktrans %}', {'anton': b'\xc3\x85'}, 'Å'),
 
             # simple translation of a variable and filter
             'i18n04': ('{% load i18n %}{% blocktrans with berta=anton|lower %}{{ berta }}{% endblocktrans %}', {'anton': b'\xc3\x85'}, 'å'),
             'legacyi18n04': ('{% load i18n %}{% blocktrans with anton|lower as berta %}{{ berta }}{% endblocktrans %}', {'anton': b'\xc3\x85'}, 'å'),
 
             # simple translation of a string with interpolation
-            'i18n05': ('{% load i18n %}{% blocktrans %}xxx{{ anton }}xxx{% endblocktrans %}', {'anton': 'yyy'}, "xxxyyyxxx"),
+            'i18n05': ('{% load i18n %}{% blocktrans %}xxx{{ anton }}xxx{% endblocktrans %}', {'anton': 'yyy'}, 'xxxyyyxxx'),
 
             # simple translation of a string to german
-            'i18n06': ('{% load i18n %}{% trans "Page not found" %}', {'LANGUAGE_CODE': 'de'}, "Seite nicht gefunden"),
+            'i18n06': ('{% load i18n %}{% trans "Page not found" %}', {'LANGUAGE_CODE': 'de'}, 'Seite nicht gefunden'),
 
             # translation of singular form
-            'i18n07': ('{% load i18n %}{% blocktrans count counter=number %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 1}, "singular"),
-            'legacyi18n07': ('{% load i18n %}{% blocktrans count number as counter %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 1}, "singular"),
+            'i18n07': ('{% load i18n %}{% blocktrans count counter=number %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 1}, 'singular'),
+            'legacyi18n07': ('{% load i18n %}{% blocktrans count number as counter %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 1}, 'singular'),
 
             # translation of plural form
-            'i18n08': ('{% load i18n %}{% blocktrans count number as counter %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 2}, "2 plural"),
-            'legacyi18n08': ('{% load i18n %}{% blocktrans count counter=number %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 2}, "2 plural"),
+            'i18n08': ('{% load i18n %}{% blocktrans count number as counter %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 2}, '2 plural'),
+            'legacyi18n08': ('{% load i18n %}{% blocktrans count counter=number %}singular{% plural %}{{ counter }} plural{% endblocktrans %}', {'number': 2}, '2 plural'),
 
             # simple non-translation (only marking) of a string to german
-            'i18n09': ('{% load i18n %}{% trans "Page not found" noop %}', {'LANGUAGE_CODE': 'de'}, "Page not found"),
+            'i18n09': ('{% load i18n %}{% trans "Page not found" noop %}', {'LANGUAGE_CODE': 'de'}, 'Page not found'),
 
             # translation of a variable with a translated filter
             'i18n10': ('{{ bool|yesno:_("yes,no,maybe") }}', {'bool': True, 'LANGUAGE_CODE': 'de'}, 'Ja'),
@@ -1352,7 +1352,7 @@ class Templates(TestCase):
             # translation of constant strings
             'i18n13': ('{{ _("Password") }}', {'LANGUAGE_CODE': 'de'}, 'Passwort'),
             'i18n14': ('{% cycle "foo" _("Password") _(\'Password\') as c %} {% cycle c %} {% cycle c %}', {'LANGUAGE_CODE': 'de'}, 'foo Passwort Passwort'),
-            'i18n15': ('{{ absent|default:_("Password") }}', {'LANGUAGE_CODE': 'de', 'absent': ""}, 'Passwort'),
+            'i18n15': ('{{ absent|default:_("Password") }}', {'LANGUAGE_CODE': 'de', 'absent': ''}, 'Passwort'),
             'i18n16': ('{{ _("<") }}', {'LANGUAGE_CODE': 'de'}, '<'),
 
             # Escaping inside blocktrans and trans works as if it was directly in the
@@ -1372,8 +1372,8 @@ class Templates(TestCase):
             'i18n25': ('{% load i18n %}{% trans somevar|upper %}', {'somevar': 'Page not found', 'LANGUAGE_CODE': 'de'}, 'SEITE NICHT GEFUNDEN'),
 
             # translation of plural form with extra field in singular form (#13568)
-            'i18n26': ('{% load i18n %}{% blocktrans with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktrans %}', {'number': 1, 'myextra_field': 'test'}, "singular test"),
-            'legacyi18n26': ('{% load i18n %}{% blocktrans with myextra_field as extra_field count number as counter %}singular {{ extra_field }}{% plural %}plural{% endblocktrans %}', {'number': 1, 'myextra_field': 'test'}, "singular test"),
+            'i18n26': ('{% load i18n %}{% blocktrans with extra_field=myextra_field count counter=number %}singular {{ extra_field }}{% plural %}plural{% endblocktrans %}', {'number': 1, 'myextra_field': 'test'}, 'singular test'),
+            'legacyi18n26': ('{% load i18n %}{% blocktrans with myextra_field as extra_field count number as counter %}singular {{ extra_field }}{% plural %}plural{% endblocktrans %}', {'number': 1, 'myextra_field': 'test'}, 'singular test'),
 
             # translation of singular form in russian (#14126)
             'i18n27': ('{% load i18n %}{% blocktrans count counter=number %}{{ counter }} result{% plural %}{{ counter }} results{% endblocktrans %}', {'number': 1, 'LANGUAGE_CODE': 'ru'}, '1 \u0440\u0435\u0437\u0443\u043b\u044c\u0442\u0430\u0442'),
@@ -1583,12 +1583,12 @@ class Templates(TestCase):
 
             ### NOW TAG ########################################################
             # Simple case
-            'now01': ('{% now "j n Y" %}', {}, "%d %d %d" % (
+            'now01': ('{% now "j n Y" %}', {}, '%d %d %d' % (
                 datetime.now().day, datetime.now().month, datetime.now().year)),
             # Check parsing of locale strings
             'now02': ('{% now "DATE_FORMAT" %}', {},  date_format(datetime.now())),
             # Also accept simple quotes - #15092
-            'now03': ("{% now 'j n Y' %}", {}, "%d %d %d" % (
+            'now03': ("{% now 'j n Y' %}", {}, '%d %d %d' % (
                 datetime.now().day, datetime.now().month, datetime.now().year)),
             'now04': ("{% now 'DATE_FORMAT' %}", {},  date_format(datetime.now())),
             'now05': ('''{% now 'j "n" Y'%}''', {}, '''%d "%d" %d''' % (
@@ -1675,49 +1675,49 @@ class Templates(TestCase):
 
 
             ### AUTOESCAPE TAG ##############################################
-            'autoescape-tag01': ("{% autoescape off %}hello{% endautoescape %}", {}, "hello"),
-            'autoescape-tag02': ("{% autoescape off %}{{ first }}{% endautoescape %}", {"first": "<b>hello</b>"}, "<b>hello</b>"),
-            'autoescape-tag03': ("{% autoescape on %}{{ first }}{% endautoescape %}", {"first": "<b>hello</b>"}, "&lt;b&gt;hello&lt;/b&gt;"),
+            'autoescape-tag01': ('{% autoescape off %}hello{% endautoescape %}', {}, 'hello'),
+            'autoescape-tag02': ('{% autoescape off %}{{ first }}{% endautoescape %}', {'first': '<b>hello</b>'}, '<b>hello</b>'),
+            'autoescape-tag03': ('{% autoescape on %}{{ first }}{% endautoescape %}', {'first': '<b>hello</b>'}, '&lt;b&gt;hello&lt;/b&gt;'),
 
             # Autoescape disabling and enabling nest in a predictable way.
-            'autoescape-tag04': ("{% autoescape off %}{{ first }} {% autoescape  on%}{{ first }}{% endautoescape %}{% endautoescape %}", {"first": "<a>"}, "<a> &lt;a&gt;"),
+            'autoescape-tag04': ('{% autoescape off %}{{ first }} {% autoescape  on%}{{ first }}{% endautoescape %}{% endautoescape %}', {'first': '<a>'}, '<a> &lt;a&gt;'),
 
-            'autoescape-tag05': ("{% autoescape on %}{{ first }}{% endautoescape %}", {"first": "<b>first</b>"}, "&lt;b&gt;first&lt;/b&gt;"),
+            'autoescape-tag05': ('{% autoescape on %}{{ first }}{% endautoescape %}', {'first': '<b>first</b>'}, '&lt;b&gt;first&lt;/b&gt;'),
 
-            # Strings (ASCII or unicode) already marked as "safe" are not
+            # Strings (ASCII or unicode) already marked as 'safe' are not
             # auto-escaped
-            'autoescape-tag06': ("{{ first }}", {"first": mark_safe("<b>first</b>")}, "<b>first</b>"),
-            'autoescape-tag07': ("{% autoescape on %}{{ first }}{% endautoescape %}", {"first": mark_safe("<b>Apple</b>")}, "<b>Apple</b>"),
+            'autoescape-tag06': ('{{ first }}', {'first': mark_safe('<b>first</b>')}, '<b>first</b>'),
+            'autoescape-tag07': ('{% autoescape on %}{{ first }}{% endautoescape %}', {'first': mark_safe('<b>Apple</b>')}, '<b>Apple</b>'),
 
             # Literal string arguments to filters, if used in the result, are
             # safe.
-            'autoescape-tag08': (r'{% autoescape on %}{{ var|default_if_none:" endquote\" hah" }}{% endautoescape %}', {"var": None}, ' endquote" hah'),
+            'autoescape-tag08': (r'{% autoescape on %}{{ var|default_if_none:" endquote\" hah" }}{% endautoescape %}', {'var': None}, ' endquote" hah'),
 
             # Objects which return safe strings as their __unicode__ method
             # won't get double-escaped.
             'autoescape-tag09': (r'{{ unsafe }}', {'unsafe': filters.UnsafeClass()}, 'you &amp; me'),
             'autoescape-tag10': (r'{{ safe }}', {'safe': filters.SafeClass()}, 'you &gt; me'),
 
-            # The "safe" and "escape" filters cannot work due to internal
+            # The 'safe' and 'escape' filters cannot work due to internal
             # implementation details (fortunately, the (no)autoescape block
             # tags can be used in those cases)
-            'autoescape-filtertag01': ("{{ first }}{% filter safe %}{{ first }} x<y{% endfilter %}", {"first": "<a>"}, template.TemplateSyntaxError),
+            'autoescape-filtertag01': ('{{ first }}{% filter safe %}{{ first }} x<y{% endfilter %}', {'first': '<a>'}, template.TemplateSyntaxError),
 
             # ifqeual compares unescaped vales.
-            'autoescape-ifequal01': ('{% ifequal var "this & that" %}yes{% endifequal %}', { "var": "this & that" }, "yes"),
+            'autoescape-ifequal01': ('{% ifequal var "this & that" %}yes{% endifequal %}', { 'var': 'this & that' }, 'yes'),
 
             # Arguments to filters are 'safe' and manipulate their input unescaped.
-            'autoescape-filters01': ('{{ var|cut:"&" }}', { "var": "this & that" }, "this  that" ),
-            'autoescape-filters02': ('{{ var|join:" & \" }}', { "var": ("Tom", "Dick", "Harry") }, "Tom & Dick & Harry"),
+            'autoescape-filters01': ('{{ var|cut:"&" }}', { 'var': 'this & that' }, 'this  that' ),
+            'autoescape-filters02': ('{{ var|join:" & \" }}', { 'var': ('Tom', 'Dick', 'Harry') }, 'Tom & Dick & Harry'),
 
             # Literal strings are safe.
-            'autoescape-literals01': ('{{ "this & that" }}',{}, "this & that"),
+            'autoescape-literals01': ('{{ "this & that" }}',{}, 'this & that'),
 
             # Iterating over strings outputs safe characters.
-            'autoescape-stringiterations01': ('{% for l in var %}{{ l }},{% endfor %}', {'var': 'K&R'}, "K,&amp;,R,"),
+            'autoescape-stringiterations01': ('{% for l in var %}{{ l }},{% endfor %}', {'var': 'K&R'}, 'K,&amp;,R,'),
 
             # Escape requirement survives lookup.
-            'autoescape-lookup01': ('{{ var.key }}', { "var": {"key": "this & that" }}, "this &amp; that"),
+            'autoescape-lookup01': ('{{ var.key }}', { 'var': {'key': 'this & that' }}, 'this &amp; that'),
 
             # Static template tags
             'static-prefixtag01': ('{% load static %}{% get_static_prefix %}', {}, settings.STATIC_URL),
@@ -1741,10 +1741,10 @@ class Templates(TestCase):
         if numpy:
             tests.update({
                 # Numpy's array-index syntax allows a template to access a certain item of a subscriptable object.
-                'numpy-array-index01': ("{{ var.1 }}", {"var": numpy.array(["first item", "second item"])}, "second item"),
+                'numpy-array-index01': ("{{ var.1 }}", {'var': numpy.array(['first item', 'second item'])}, 'second item'),
 
                 # Fail silently when the array index is out of range.
-                'numpy-array-index02': ("{{ var.5 }}", {"var": numpy.array(["first item", "second item"])}, ("", "INVALID")),
+                'numpy-array-index02': ('{{ var.5 }}', {'var': numpy.array(['first item', 'second item'])}, ('', 'INVALID')),
             })
 
 
@@ -1765,7 +1765,7 @@ class TemplateTagLoading(unittest.TestCase):
         template_base.templatetags_modules = self.old_tag_modules
 
     def test_load_error(self):
-        ttext = "{% load broken_tag %}"
+        ttext = '{% load broken_tag %}'
         self.assertRaises(template.TemplateSyntaxError, template.Template, ttext)
         try:
             template.Template(ttext)
@@ -1774,7 +1774,7 @@ class TemplateTagLoading(unittest.TestCase):
             self.assertTrue('Xtemplate' in e.args[0])
 
     def test_load_error_egg(self):
-        ttext = "{% load broken_egg %}"
+        ttext = '{% load broken_egg %}'
         egg_name = '%s/tagsegg.egg' % self.egg_dir
         sys.path.append(egg_name)
         settings.INSTALLED_APPS = ('tagsegg',)
@@ -1786,7 +1786,7 @@ class TemplateTagLoading(unittest.TestCase):
             self.assertTrue('Xtemplate' in e.args[0])
 
     def test_load_working_egg(self):
-        ttext = "{% load working_egg %}"
+        ttext = '{% load working_egg %}'
         egg_name = '%s/tagsegg.egg' % self.egg_dir
         sys.path.append(egg_name)
         settings.INSTALLED_APPS = ('tagsegg',)
@@ -1807,7 +1807,7 @@ class RequestContextTests(unittest.TestCase):
 
     def test_include_only(self):
         """
-        Regression test for #15721, ``{% include %}`` and ``RequestContext``
+        Regression test for #15721, '{% include %}' and 'RequestContext'
         not playing together nicely.
         """
         ctx = RequestContext(self.fake_request, {'var': 'parent'})
